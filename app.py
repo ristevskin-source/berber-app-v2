@@ -120,7 +120,6 @@ def proveri_slotove_za_uslugu(datum, pocetak, trajanje):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     
-    # Proveri da li su svi slotovi u opsegu slobodni
     c.execute("""
         SELECT vreme FROM rezervacije 
         WHERE datum=? AND vreme >= ? AND vreme < ? AND ime IS NOT NULL AND ime != ''
@@ -129,9 +128,8 @@ def proveri_slotove_za_uslugu(datum, pocetak, trajanje):
     conn.close()
     
     if zauzeti:
-        return None  # Ima zauzetih slotova
+        return None
     
-    # Vrati listu vremena slotova koje bi usluga zauzela
     slotovi = []
     trenutno = pocetak_dt
     while trenutno < kraj_dt:
@@ -179,6 +177,9 @@ def prikazi_usluge():
                     'cena': cena,
                     'trajanje': trajanje
                 }
+                # Obriši stari termin ako je bio izabran
+                if 'izabrani_termin' in st.session_state:
+                    del st.session_state['izabrani_termin']
                 st.rerun()
     
     if 'izabrana_usluga' in st.session_state:
@@ -199,33 +200,27 @@ def prikazi_slotove(datum):
     
     if not svi_slotovi:
         st.warning("⏳ Nema termina za izabrani datum.")
-        return None
+        return
     
     st.write("### 📅 Korak 2: Izaberite termin")
     
-    # Podeli u redove po 4
     cols_per_row = 4
     rows = [svi_slotovi[i:i+cols_per_row] for i in range(0, len(svi_slotovi), cols_per_row)]
-    
-    kliknuto_vreme = None
     
     for row in rows:
         cols = st.columns(cols_per_row)
         for j, (vreme, ime) in enumerate(row):
             with cols[j]:
                 if ime is None or ime == "":
-                    # Slobodan termin
                     if st.button(f"🟢 {vreme}", key=f"slot_{datum}_{vreme}", use_container_width=True):
-                        kliknuto_vreme = vreme
+                        st.session_state['izabrani_termin'] = vreme
+                        st.rerun()
                 else:
-                    # Zauzet termin
                     st.markdown(f"""
                     <div style="background-color:#7a2a2a; color:#aaaaaa; border:1px solid #aa4a4a; border-radius:8px; padding:8px 0; text-align:center; width:100%; font-weight:bold; cursor:not-allowed; opacity:0.7;">
                         🔴 {vreme}
                     </div>
                     """, unsafe_allow_html=True)
-    
-    return kliknuto_vreme
 
 def prikazi_admin_tabelu(datum):
     """Prikazuje tabelarni pregled svih termina za admina"""
@@ -244,10 +239,8 @@ def prikazi_admin_tabelu(datum):
         st.info("📭 Nema termina za izabrani datum.")
         return
     
-    # Prikaz tabele
     st.write("### 📋 Raspored termina")
     
-    # Zaglavlje
     cols = st.columns([2, 3, 3, 4, 3, 2])
     with cols[0]: st.write("**Vreme**")
     with cols[1]: st.write("**Klijent**")
@@ -282,7 +275,6 @@ def admin_rucno_zakazi(datum):
         ime = st.text_input("Ime i prezime *")
         telefon = st.text_input("Telefon *")
         
-        # Dohvati usluge
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
         c.execute("SELECT usluga, cena, trajanje FROM cenovnik ORDER BY trajanje ASC")
@@ -297,7 +289,6 @@ def admin_rucno_zakazi(datum):
         usluga_cena = usluge[idx][1]
         usluga_trajanje = usluge[idx][2]
         
-        # Dohvati sve slotove za taj dan
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
         c.execute("""
@@ -319,7 +310,6 @@ def admin_rucno_zakazi(datum):
         
         if potvrdi:
             if ime and telefon and ime.strip() and telefon.strip():
-                # Proveri da li ima mesta
                 slotovi = proveri_slotove_za_uslugu(datum, izabrano_vreme, usluga_trajanje)
                 if slotovi is None:
                     st.error("❌ Nema dovoljno slobodnih termina za ovu uslugu u izabrano vreme.")
@@ -358,6 +348,10 @@ with tab1:
         """, unsafe_allow_html=True)
         if st.button("📅 Zakaži novi termin"):
             st.session_state['booking_success'] = False
+            if 'izabrana_usluga' in st.session_state:
+                del st.session_state['izabrana_usluga']
+            if 'izabrani_termin' in st.session_state:
+                del st.session_state['izabrani_termin']
             st.rerun()
     else:
         conn = sqlite3.connect('termini.db')
@@ -370,27 +364,34 @@ with tab1:
             
             datum = st.selectbox("Datum", datumi_raw, format_func=formatiraj_datum)
             
+            # Prikaz izabranog datuma
+            st.info(f"📅 Termini za: {formatiraj_datum(datum)}")
+            
             # Korak 1: Izbor usluge
             prikazi_usluge()
             
             # Korak 2: Izbor termina (ako je usluga izabrana)
             if 'izabrana_usluga' in st.session_state:
-                kliknuto_vreme = prikazi_slotove(datum)
+                prikazi_slotove(datum)
                 
                 # Korak 3: Unos podataka (ako je termin izabran)
-                if kliknuto_vreme:
+                if 'izabrani_termin' in st.session_state:
+                    kliknuto_vreme = st.session_state['izabrani_termin']
                     st.write("### 📝 Korak 3: Unesite podatke")
                     
                     with st.form(key="klijent_form"):
                         ime = st.text_input("Ime i prezime *")
                         telefon = st.text_input("Telefon *")
                         
-                        # Proveri da li ima mesta
                         usluga = st.session_state['izabrana_usluga']
                         slotovi = proveri_slotove_za_uslugu(datum, kliknuto_vreme, usluga['trajanje'])
                         
                         if slotovi is None:
                             st.error("❌ Nema dovoljno slobodnih termina za ovu uslugu u izabrano vreme.")
+                            # Ako nema mesta, omogući klijentu da izabere drugi termin
+                            if st.button("🔄 Izaberi drugi termin"):
+                                del st.session_state['izabrani_termin']
+                                st.rerun()
                         else:
                             st.success(f"✅ Usluga **{usluga['ime']}** traje **{usluga['trajanje']} min** i zauzima **{len(slotovi)} slotova**.")
                             st.write("Zauzeće sledeće slotove:")
@@ -402,6 +403,11 @@ with tab1:
                             if potvrdi:
                                 if ime and telefon and ime.strip() and telefon.strip():
                                     if rezervisi_slotove(datum, slotovi, ime, telefon, usluga['ime'], usluga['cena'], usluga['trajanje']):
+                                        # Očisti session_state
+                                        if 'izabrani_termin' in st.session_state:
+                                            del st.session_state['izabrani_termin']
+                                        if 'izabrana_usluga' in st.session_state:
+                                            del st.session_state['izabrana_usluga']
                                         st.session_state['booking_success'] = True
                                         st.session_state['booking_details'] = {
                                             'usluga': usluga['ime'],
@@ -522,7 +528,6 @@ with tab2:
         # ---------- ADMIN TABELA ----------
         st.subheader("📋 Pregled i upravljanje terminima")
         
-        # Izbor datuma za admina
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
         datumi_raw = generisi_datume()
@@ -536,12 +541,10 @@ with tab2:
                 key="admin_datum"
             )
             
-            # Prikaz tabele
             prikazi_admin_tabelu(admin_datum)
             
             st.divider()
             
-            # Admin ručno zakazivanje
             admin_rucno_zakazi(admin_datum)
         else:
             st.info("📭 Nema dostupnih datuma.")
