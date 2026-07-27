@@ -161,7 +161,6 @@ def prikazi_usluge():
     
     st.write("### ✂️ Korak 1: Izaberite uslugu")
     
-    # Prikaz usluga kao kartice
     for usluga, cena, trajanje in usluge:
         col1, col2, col3, col4 = st.columns([4, 1, 1, 1])
         with col1:
@@ -182,7 +181,7 @@ def prikazi_usluge():
                 st.rerun()
         st.write("---")
     
-    if 'izabrana_usluga' in st.session_state:
+    if 'izabrana_usluga' in st.session_state and isinstance(st.session_state['izabrana_usluga'], dict):
         usl = st.session_state['izabrana_usluga']
         st.success(f"✅ Izabrali ste: **{usl['ime']}** ({usl['trajanje']} min, {usl['cena']} din)")
 
@@ -204,7 +203,6 @@ def prikazi_slotove(datum):
     
     st.write("### 📅 Korak 2: Izaberite termin")
     
-    # Podeli u redove po 4
     cols_per_row = 4
     rows = [svi_slotovi[i:i+cols_per_row] for i in range(0, len(svi_slotovi), cols_per_row)]
     
@@ -213,15 +211,9 @@ def prikazi_slotove(datum):
         for j, (vreme, ime) in enumerate(row):
             with cols[j]:
                 if ime is None or ime == "":
-                    # Slobodan termin - koristi HTML dugme umesto st.button
-                    st.markdown(f"""
-                    <form action="" method="post">
-                        <button type="submit" name="slot" value="{vreme}" 
-                                style="background-color: #2a7a2a; color:white; border:1px solid #4ac24a; border-radius:8px; padding:8px 0; text-align:center; width:100%; font-weight:bold; cursor:pointer;">
-                            🟢 {vreme}
-                        </button>
-                    </form>
-                    """, unsafe_allow_html=True)
+                    if st.button(f"🟢 {vreme}", key=f"slot_{datum}_{vreme}", use_container_width=True):
+                        st.session_state['izabrani_termin'] = vreme
+                        st.rerun()
                 else:
                     st.markdown(f"""
                     <div style="background-color:#7a2a2a; color:#aaaaaa; border:1px solid #aa4a4a; border-radius:8px; padding:8px 0; text-align:center; width:100%; font-weight:bold; cursor:not-allowed; opacity:0.7;">
@@ -247,7 +239,6 @@ def prikazi_admin_tabelu(datum):
     
     st.write("### 📋 Raspored termina")
     
-    # Zaglavlje
     cols = st.columns([2, 3, 3, 4, 3, 2])
     with cols[0]: st.write("**Vreme**")
     with cols[1]: st.write("**Klijent**")
@@ -342,6 +333,10 @@ if 'booking_success' not in st.session_state:
 tab1, tab2 = st.tabs(["📅 Zakazivanje", "🔑 Admin Panel"])
 
 with tab1:
+    # Resetuj session_state ako je u neispravnom stanju
+    if 'izabrana_usluga' in st.session_state and not isinstance(st.session_state['izabrana_usluga'], (dict, type(None))):
+        st.session_state['izabrana_usluga'] = None
+
     if st.session_state['booking_success']:
         detalji = st.session_state['booking_details']
         st.balloons()
@@ -374,23 +369,11 @@ with tab1:
             datum = st.selectbox("Datum", datumi_raw, format_func=formatiraj_datum)
             st.info(f"📅 Termini za: {formatiraj_datum(datum)}")
             
-            # Korak 1: Izbor usluge
             prikazi_usluge()
             
-            # Korak 2: Izbor termina (ako je usluga izabrana)
             if st.session_state['izabrana_usluga'] is not None:
                 prikazi_slotove(datum)
                 
-                # Obradi klik na termin (preko POST parametra)
-                import streamlit as st
-                # Proveri da li je kliknuto na neki slot
-                slot_klik = st.query_params.get('slot')
-                if slot_klik:
-                    st.session_state['izabrani_termin'] = slot_klik
-                    st.query_params.clear()
-                    st.rerun()
-                
-                # Korak 3: Unos podataka (ako je termin izabran)
                 if st.session_state['izabrani_termin'] is not None:
                     kliknuto_vreme = st.session_state['izabrani_termin']
                     st.write("### 📝 Korak 3: Unesite podatke")
