@@ -186,6 +186,7 @@ def prikazi_usluge():
         st.success(f"✅ Izabrali ste: **{usl['ime']}** ({usl['trajanje']} min, {usl['cena']} din)")
 
 def prikazi_slotove(datum):
+    """Prikazuje tabelu slotova sa mogućnošću izbora"""
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     
@@ -211,15 +212,26 @@ def prikazi_slotove(datum):
         for j, (vreme, ime) in enumerate(row):
             with cols[j]:
                 if ime is None or ime == "":
-                    if st.button(f"🟢 {vreme}", key=f"slot_{datum}_{vreme}", use_container_width=True):
-                        st.session_state['izabrani_termin'] = vreme
-                        st.rerun()
+                    # Slobodan termin - HTML dugme sa JavaScript-om
+                    st.markdown(f"""
+                    <div style="background-color:#2a7a2a; color:white; border:1px solid #4ac24a; border-radius:8px; padding:8px 0; text-align:center; width:100%; font-weight:bold; cursor:pointer;" 
+                         onclick="window.location.href='?slot={vreme}'">
+                        🟢 {vreme}
+                    </div>
+                    """, unsafe_allow_html=True)
                 else:
                     st.markdown(f"""
                     <div style="background-color:#7a2a2a; color:#aaaaaa; border:1px solid #aa4a4a; border-radius:8px; padding:8px 0; text-align:center; width:100%; font-weight:bold; cursor:not-allowed; opacity:0.7;">
                         🔴 {vreme}
                     </div>
                     """, unsafe_allow_html=True)
+    
+    # Obradi klik na termin (preko query_params)
+    slot_klik = st.query_params.get('slot')
+    if slot_klik:
+        st.session_state['izabrani_termin'] = slot_klik
+        st.query_params.clear()
+        st.rerun()
 
 def prikazi_admin_tabelu(datum):
     conn = sqlite3.connect('termini.db')
