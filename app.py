@@ -8,6 +8,7 @@ st.set_page_config(page_title="💈 Berberski salon - Zakazivanje", layout="cent
 # ---------- STILOVI ZA MOBILNI ----------
 st.markdown("""
 <style>
+    /* Poruke o greškama neka budu vidljive na vrhu */
     .stAlert {
         position: sticky;
         top: 0;
@@ -16,6 +17,7 @@ st.markdown("""
         padding: 10px;
         margin-bottom: 10px;
     }
+    /* Smanji font na telefonu */
     @media (max-width: 600px) {
         .stButton > button {
             font-size: 14px !important;
@@ -105,7 +107,7 @@ def generisi_slotove_za_dan(datum_str):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     
-    # Obriši sve slotove za taj dan
+    # Obriši sve slotove za taj dan pre nego što ih kreiraš
     c.execute("DELETE FROM rezervacije WHERE datum=?", (datum_str,))
     
     sat_start, min_start = RADNO_VREME[0]
@@ -139,7 +141,6 @@ def osvezi_termine():
     return True
 
 def proveri_slotove_za_uslugu(datum, pocetak, trajanje):
-    """Vraća listu slotova koje bi usluga zauzela, ili None ako nema mesta"""
     broj_slotova = trajanje // INTERVAL_MIN
     if trajanje % INTERVAL_MIN != 0:
         broj_slotova += 1
@@ -150,15 +151,14 @@ def proveri_slotove_za_uslugu(datum, pocetak, trajanje):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     
-    # Proveri da li POSTOJI BILO KOJI zauzet slot u opsegu
     c.execute("""
-        SELECT COUNT(*) FROM rezervacije 
+        SELECT vreme FROM rezervacije 
         WHERE datum=? AND vreme >= ? AND vreme < ? AND ime IS NOT NULL AND ime != ''
     """, (datum, pocetak, kraj_dt.strftime("%H:%M")))
-    broj_zauzetih = c.fetchone()[0]
+    zauzeti = c.fetchall()
     conn.close()
     
-    if broj_zauzetih > 0:
+    if zauzeti:
         return None
     
     slotovi = []
@@ -170,21 +170,8 @@ def proveri_slotove_za_uslugu(datum, pocetak, trajanje):
     return slotovi
 
 def rezervisi_slotove(datum, slotovi, ime, telefon, usluga, cena, trajanje):
-    """Rezerviše listu slotova SAMO ako su svi slobodni"""
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    
-    # Prvo proveri da li su svi slotovi i dalje slobodni
-    mjesto = ','.join(['?'] * len(slotovi))
-    c.execute(f"""
-        SELECT COUNT(*) FROM rezervacije 
-        WHERE datum=? AND vreme IN ({mjesto}) AND ime IS NOT NULL AND ime != ''
-    """, (datum, *slotovi))
-    broj_zauzetih = c.fetchone()[0]
-    
-    if broj_zauzetih > 0:
-        conn.close()
-        return False
     
     for vreme in slotovi:
         c.execute("""
@@ -367,6 +354,7 @@ def admin_rucno_zakazi(datum):
 # ---------- UI ----------
 st.title("💈 Berberski salon - Zakazivanje")
 
+# Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
     st.session_state['izabrana_usluga'] = None
 if 'izabrani_termin' not in st.session_state:
