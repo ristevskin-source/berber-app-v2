@@ -5,6 +5,37 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="💈 Berberski salon - Zakazivanje", layout="centered")
 
+# ---------- STILOVI ZA MOBILNI ----------
+st.markdown("""
+<style>
+    /* Poruke o greškama neka budu vidljive na vrhu */
+    .stAlert {
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        background-color: #4a2c1a;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    /* Smanji font na telefonu */
+    @media (max-width: 600px) {
+        .stButton > button {
+            font-size: 14px !important;
+            padding: 6px 12px !important;
+        }
+        .stTextInput > div > div > input {
+            font-size: 14px !important;
+        }
+        .stSelectbox > div > div > div {
+            font-size: 14px !important;
+        }
+        h1, h2, h3 {
+            font-size: 1.2em !important;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+
 RADNO_VREME = [(9,0), (20,0)]
 INTERVAL_MIN = 15
 BROJ_DANA = 7
@@ -76,7 +107,8 @@ def generisi_slotove_za_dan(datum_str):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     
-    c.execute("DELETE FROM rezervacije WHERE datum=? AND ime IS NULL", (datum_str,))
+    # Obriši sve slotove za taj dan pre nego što ih kreiraš
+    c.execute("DELETE FROM rezervacije WHERE datum=?", (datum_str,))
     
     sat_start, min_start = RADNO_VREME[0]
     sat_kraj, min_kraj = RADNO_VREME[1]
@@ -186,7 +218,6 @@ def prikazi_usluge():
         st.success(f"✅ Izabrali ste: **{usl['ime']}** ({usl['trajanje']} min, {usl['cena']} din)")
 
 def prikazi_slotove(datum):
-    """Prikazuje tabelu slotova sa mogućnošću izbora"""
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     
@@ -334,7 +365,6 @@ if 'booking_success' not in st.session_state:
 tab1, tab2 = st.tabs(["📅 Zakazivanje", "🔑 Admin Panel"])
 
 with tab1:
-    # Resetuj session_state ako je u neispravnom stanju
     if 'izabrana_usluga' in st.session_state and not isinstance(st.session_state['izabrana_usluga'], (dict, type(None))):
         st.session_state['izabrana_usluga'] = None
 
@@ -521,7 +551,6 @@ with tab2:
         else:
             st.info("📭 Još uvek nema naplaćenih usluga.")
         
-        # ---------- ADMIN TABELA ----------
         st.subheader("📋 Pregled i upravljanje terminima")
         
         conn = sqlite3.connect('termini.db')
