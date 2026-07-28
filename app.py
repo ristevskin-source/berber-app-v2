@@ -354,7 +354,6 @@ def admin_rucno_zakazi(datum):
                         st.error("❌ Greška pri rezervaciji.")
             else:
                 st.warning("⚠️ Popunite ime i telefon.")
-
 # ---------- UI ----------
 st.title("💈 Berberski salon - Zakazivanje")
 
