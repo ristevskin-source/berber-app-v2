@@ -304,6 +304,9 @@ def admin_rucno_zakazi(datum):
         ime = st.text_input("Ime i prezime *")
         telefon = st.text_input("Telefon *")
         
+        # OVO DODAJEMO: Polje za biranje datuma
+        datum = st.date_input("Odaberi datum za uslugu", value=datetime.date.today())
+        
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
         c.execute("SELECT usluga, cena, trajanje FROM cenovnik ORDER BY trajanje ASC")
@@ -320,6 +323,7 @@ def admin_rucno_zakazi(datum):
         
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
+        # Sada c.execute koristi datum koji je admin izabrao iz kalendara
         c.execute("""
             SELECT vreme, ime FROM rezervacije 
             WHERE datum=? AND ime IS NULL
