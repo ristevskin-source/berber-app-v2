@@ -112,40 +112,39 @@ def prikazi_slotove(datum):
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
     
-    # HTML Grid mreža (3 kolone) koja radi savršeno na telefonu
-    html_red = "<div style='display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;'>"
-    
-    for vreme, ime in svi_slotovi:
-        if vreme >= "12:00" and vreme < "13:00": # PAUZA
-            html_red += f"""
-            <div style="background-color: #333; border: 1px solid #ff4b4b; border-radius: 8px; padding: 6px 0; text-align: center; font-size: 12px; color: #ff4b4b; font-weight: bold;">
-                🚫 PAUZA
-            </div>
-            """
-            continue
+    # Pravimo 3 kolone (Streamlit će ih na telefonu spakovati najbolje što može)
+    cols = st.columns(3)
 
-        if ime is not None: # ZAUZETO
-            html_red += f"""
-            <div style="background-color: #a85a5a; border-radius: 8px; padding: 6px 0; text-align: center; font-size: 13px; color: #fff; font-weight: bold;">
-                {vreme}
-            </div>
-            """
-        else: # SLOBODNO
-            key = f"slot_{vreme}_{datum}"
-            html_red += f"""
-            <div>
-                <button onclick="document.querySelector('button[data-testid=\\'baseButton-{key}\\']').click();" style="width: 100%; background-color: #4CAF50; border: none; border-radius: 8px; padding: 6px 0; color: white; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;">
-                    🟢 {vreme}
-                </button>
-            </div>
-            """
-            if st.button(f"🟢 {vreme}", key=key):
-                st.session_state['izabrani_termin'] = vreme
-                st.rerun()
+    for i, (vreme, ime) in enumerate(svi_slotovi):
+        with cols[i % 3]: # Raspoređuje ih u 3 kolone redom
+            
+            # 1. PAUZA - Zabrana ulaska
+            if vreme >= "12:00" and vreme < "13:00":
+                st.markdown(
+                    f"""
+                    <div style="background-color: #333333; border: 1px solid #ff4b4b; border-radius: 8px; padding: 6px 0; text-align: center; margin-bottom: 8px; font-size: 12px;">
+                        <span style="color: #ff4b4b; font-weight: bold;">🚫 PAUZA</span>
+                    </div>
+                    """, 
+                    unsafe_allow_html=True
+                )
+                continue
 
-    html_red += "</div>"
-    st.markdown(html_red, unsafe_allow_html=True)
-
+            # 2. ZAUZETI TERMIN
+            if ime is not None:
+                st.markdown(
+                    f"""
+                    <div style="background-color: #a85a5a; border-radius: 8px; padding: 6px 0; text-align: center; margin-bottom: 8px; font-size: 13px;">
+                        <span style="color: #ffffff; font-weight: bold;">{vreme}</span>
+                    </div>
+                    """, 
+                    unsafe_allow_html=True
+                )
+            else:
+                # 3. SLOBODNI TERMIN
+                if st.button(f"🟢 {vreme}", key=f"slot_{vreme}_{datum}"):
+                    st.session_state['izabrani_termin'] = vreme
+                    st.rerun()
 # --- ADMINISTRATORSKA FUNKCIJA (sa datumom) ---
 def admin_rucno_zakazi(datum):
     st.write("### ➕ Ručno zakazivanje")
