@@ -112,17 +112,17 @@ def prikazi_slotove(datum):
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
     
-    # Pravimo 3 kolone (Streamlit će ih na telefonu spakovati najbolje što može)
-    cols = st.columns(3)
+    # Pravimo 2 kolone - Ovo je idealno za mobilni telefon i neće se lomiti!
+    cols = st.columns(2)
 
     for i, (vreme, ime) in enumerate(svi_slotovi):
-        with cols[i % 3]: # Raspoređuje ih u 3 kolone redom
+        with cols[i % 2]: # Sada se raspoređuje levo-desno (2 po 2)
             
             # 1. PAUZA - Zabrana ulaska
             if vreme >= "12:00" and vreme < "13:00":
                 st.markdown(
                     f"""
-                    <div style="background-color: #333333; border: 1px solid #ff4b4b; border-radius: 8px; padding: 6px 0; text-align: center; margin-bottom: 8px; font-size: 12px;">
+                    <div style="background-color: #333333; border: 1px solid #ff4b4b; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 10px; font-size: 13px;">
                         <span style="color: #ff4b4b; font-weight: bold;">🚫 PAUZA</span>
                     </div>
                     """, 
@@ -134,7 +134,7 @@ def prikazi_slotove(datum):
             if ime is not None:
                 st.markdown(
                     f"""
-                    <div style="background-color: #a85a5a; border-radius: 8px; padding: 6px 0; text-align: center; margin-bottom: 8px; font-size: 13px;">
+                    <div style="background-color: #a85a5a; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 10px; font-size: 14px;">
                         <span style="color: #ffffff; font-weight: bold;">{vreme}</span>
                     </div>
                     """, 
