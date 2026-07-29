@@ -317,7 +317,7 @@ with tab1:
                         if slotovi is None:
                            st.error("❌ Nema dovoljno slobodnih termina za ovu uslugu u izabrano vreme.")
 
-                            odustani = st.form_submit_button("🔄 Izaberi drugi termin")
+                        
 
                         if odustani:
                           st.session_state['izabrani_termin'] = None
