@@ -362,3 +362,25 @@ with tab1:
 with tab2:
     st.write("## 🔑 Admin Panel")
     admin_rucno_zakazi(datetime.now().date())
+
+    st.write("---")
+    st.write("### 📋 Zakazani klijenti")
+
+    conn = sqlite3.connect('termini.db')
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT vreme, ime, telefon, usluga, cena
+        FROM rezervacije
+        WHERE datum=?
+        AND ime IS NOT NULL
+        ORDER BY vreme ASC
+    """, (datetime.now().date(),))
+
+    zakazani = c.fetchall()
+    conn.close()
+
+    if zakazani:
+        st.table(zakazani)
+    else:
+        st.info("Nema zakazanih klijenata za danas.")
