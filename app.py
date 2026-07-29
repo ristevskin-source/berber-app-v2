@@ -2,37 +2,13 @@ import streamlit as st
 import sqlite3
 from datetime import datetime, timedelta
 
-# --- DODATAK ZA MOBILNI PRIKAZ (4 KOLONE) ---
-st.markdown("""
-<style>
-    /* Ovo se aktivira SAMO na mobilnim telefonima (širina ekrana manja od 600px) */
-    @media only screen and (max-width: 600px) {
-        /* Smanjujemo margine i padding na minimum */
-        .stVerticalBlock {
-            padding-left: 0px !important;
-            padding-right: 0px !important;
-            gap: 0.2rem !important;
-        }
-        
-        /* Teramo dugmiće da budu manji i da se lepo slože */
-        .stButton > button {
-            width: 100% !important;
-            padding: 4px 2px !important;
-            font-size: 11px !important;
-            min-height: 30px !important;
-        }
+# --- PODEŠAVANJE STRANICE ---
+st.set_page_config(page_title="Kod Kubanca", page_icon="✂️")
 
-        /* Smanjujemo širinu kolona da bi 4 mogle da stanu u jedan red */
-        .stColumn {
-            padding-left: 2px !important;
-            padding-right: 2px !important;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
-# --- KRAJ DODATKA ---
+# --- PRIKAZ LOGOA (Zameni "logo.png" sa tačnim imenom tvoje slike) ---
+st.image("logo.png", width=150)
 
-# --- POMOĆNE FUNKCIJE (Dodate da sve radi odjednom) ---
+# --- POMOĆNE FUNKCIJE ---
 def formatiraj_datum(datum):
     return datum.strftime("%d.%m.%Y.")
 
@@ -47,7 +23,6 @@ def osvezi_termine():
     pass # Mesto za logiku ako ti treba osvežavanje
 
 # --- GLAVNE FUNKCIJE ---
-
 def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -55,7 +30,6 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     svi_slotovi = c.fetchall()
     conn.close()
 
-    # Pronalazimo indeks početnog termina
     start_index = None
     for i, (slot_vreme, ime) in enumerate(svi_slotovi):
         if slot_vreme == vreme:
@@ -65,18 +39,14 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     if start_index is None:
         return None
 
-    # Broj potrebnih slotova (15 minuta po slotu)
     broj_slotova = trajanje // 15
-
-    # Provera da li ima dovoljno mesta
     if start_index + broj_slotova > len(svi_slotovi):
         return None
 
-    # Provera da li su svi potrebni slotovi slobodni
     potrebni_slotovi = []
     for i in range(broj_slotova):
         slot_vreme, ime = svi_slotovi[start_index + i]
-        if ime is not None: # Zauzeto
+        if ime is not None:
             return None
         potrebni_slotovi.append(slot_vreme)
 
@@ -96,9 +66,9 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
         conn.close()
         return True
     except Exception as e:
-        return False # Vraćamo False, ali NE prikazujemo 'e' klijentu!
+        return False
 
-# --- FUNKCIJA ZA PRIKAZ USLUGA ---
+# --- FUNKCIJA ZA PRIKAZ USLUGA (2 kolone za mobilni) ---
 def prikazi_usluge():
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -128,7 +98,7 @@ def prikazi_usluge():
                 st.rerun()
             st.write("---")
 
-# --- FUNKCIJA ZA PRIKAZ SLOTOVA (SA 4 KOLONE I PAUZOM) ---
+# --- FUNKCIJA ZA PRIKAZ SLOTOVA (HTML Mreža za mobilni) ---
 def prikazi_slotove(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -141,40 +111,42 @@ def prikazi_slotove(datum):
         return
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
-    # Pravimo 4 kolone za mobilni prikaz
-    cols = st.columns(4)
+    
+    # HTML Grid mreža (3 kolone) koja radi savršeno na telefonu
+    html_red = "<div style='display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;'>"
+    
+    for vreme, ime in svi_slotovi:
+        if vreme >= "12:00" and vreme < "13:00": # PAUZA
+            html_red += f"""
+            <div style="background-color: #333; border: 1px solid #ff4b4b; border-radius: 8px; padding: 6px 0; text-align: center; font-size: 12px; color: #ff4b4b; font-weight: bold;">
+                🚫 PAUZA
+            </div>
+            """
+            continue
 
-    for i, (vreme, ime) in enumerate(svi_slotovi):
-        with cols[i % 4]:
-            # 1. PAUZA - Zabrana ulaska
-            if vreme >= "12:00" and vreme < "13:00":
-                st.markdown(
-                    f"""
-                    <div style='background-color: #333333; border: 1px solid #ff4b4b; border-radius: 10px; padding: 5px; text-align: center; margin-bottom: 8px;'>
-                        <span style='color: #ff4b4b; font-weight: bold;'>🚫 PAUZA</span>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
-                continue  # Preskačemo, nema dugmeta!
+        if ime is not None: # ZAUZETO
+            html_red += f"""
+            <div style="background-color: #a85a5a; border-radius: 8px; padding: 6px 0; text-align: center; font-size: 13px; color: #fff; font-weight: bold;">
+                {vreme}
+            </div>
+            """
+        else: # SLOBODNO
+            key = f"slot_{vreme}_{datum}"
+            html_red += f"""
+            <div>
+                <button onclick="document.querySelector('button[data-testid=\\'baseButton-{key}\\']').click();" style="width: 100%; background-color: #4CAF50; border: none; border-radius: 8px; padding: 6px 0; color: white; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;">
+                    🟢 {vreme}
+                </button>
+            </div>
+            """
+            if st.button(f"🟢 {vreme}", key=key):
+                st.session_state['izabrani_termin'] = vreme
+                st.rerun()
 
-            # 2. ZAUZETI TERMIN
-            if ime is not None:
-                st.markdown(
-                    f"""
-                    <div style='background-color: #a85a5a; border-radius: 10px; padding: 5px; text-align: center; margin-bottom: 8px;'>
-                        <span style='color: #ffcccc; font-weight: bold;'>{vreme}</span>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
-            else:
-                # 3. SLOBODNI TERMIN
-                if st.button(f"🟢 {vreme}", key=f"slot_{vreme}_{datum}"):
-                    st.session_state['izabrani_termin'] = vreme
-                    st.rerun()
+    html_red += "</div>"
+    st.markdown(html_red, unsafe_allow_html=True)
 
-# --- ADMINISTRATORSKA FUNKCIJA (SA DATUMOM) ---
+# --- ADMINISTRATORSKA FUNKCIJA (sa datumom) ---
 def admin_rucno_zakazi(datum):
     st.write("### ➕ Ručno zakazivanje")
     
@@ -182,7 +154,7 @@ def admin_rucno_zakazi(datum):
         ime = st.text_input("Ime i prezime *")
         telefon = st.text_input("Telefon *")
         
-        # DODATAK: Odabir datuma
+        # DODATAK: Odabir datuma unutar forme
         datum = st.date_input("Odaberi datum za uslugu", value=datetime.now().date())
         
         conn = sqlite3.connect('termini.db')
@@ -233,8 +205,6 @@ def admin_rucno_zakazi(datum):
                 st.warning("⚠️ Popunite ime i telefon.")
 
 # --- GLAVNI DEO APLIKACIJE ---
-
-st.set_page_config(page_title="Kod Kubanca", page_icon="✂️")
 
 # Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
