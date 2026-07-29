@@ -315,14 +315,14 @@ with tab1:
                         slotovi = proveri_slotove_za_uslugu(datum, kliknuto_vreme, usluga['trajanje'])
                         
                         if slotovi is None:
-st.error("❌ Nema dovoljno slobodnih termina za ovu uslugu u izabrano vreme.")
+                           st.error("❌ Nema dovoljno slobodnih termina za ovu uslugu u izabrano vreme.")
 
-odustani = st.form_submit_button("🔄 Izaberi drugi termin")
+                            odustani = st.form_submit_button("🔄 Izaberi drugi termin")
 
-if odustani:
-    st.session_state['izabrani_termin'] = None
-    st.rerun()
-                        else:
+                        if odustani:
+                          st.session_state['izabrani_termin'] = None
+                          st.rerun()
+                         else:
                             st.success(f"✅ Usluga **{usluga['ime']}** traje **{usluga['trajanje']} min** i zauzima **{len(slotovi)} slotova**.")
                             st.write("Zauzeće sledeće slotove:")
                             for s in slotovi:
