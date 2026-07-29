@@ -112,50 +112,56 @@ def prikazi_slotove(datum):
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
 
-    # Pravimo grupe termina po satima (npr. "09:00 - 09:45")
+    # Pravimo grupe termina po satima
     termini_po_satima = {}
     for vreme, ime in svi_slotovi:
-        sat = vreme.split(":")[0] # Uzimamo samo prva dva broja (sat)
+        sat = vreme.split(":")[0]
         if sat not in termini_po_satima:
             termini_po_satima[sat] = []
         termini_po_satima[sat].append((vreme, ime))
 
-    # Kreiramo tabove za svaki sat
     satovi = sorted(termini_po_satima.keys())
     tabovi = st.tabs([f"{sat}:00" for sat in satovi])
 
     # Prikazujemo termine unutar svakog taba
     for i, sat in enumerate(satovi):
         with tabovi[i]:
-            for vreme, ime in termini_po_satima[sat]:
+            
+            # Pravimo 2 kolone unutar taba da termini stanu lepo na telefon
+            cols = st.columns(2) 
+            
+            for index, (vreme, ime) in enumerate(termini_po_satima[sat]):
                 
-                # 1. PAUZA (12:00 DO 13:00)
-                if vreme >= "12:00" and vreme < "13:00":
-                    st.markdown(
-                        f"""
-                        <div style="background-color: #2c2c2c; border: 2px solid #ff4b4b; border-radius: 8px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                            <span style="color: #ff4b4b; font-weight: bold; font-size: 16px;">🚫 PAUZA ({vreme})</span>
-                        </div>
-                        """, 
-                        unsafe_allow_html=True
-                    )
-                    continue
+                # Raspoređujemo u 2 kolone unutar ovog sata
+                with cols[index % 2]:
+                    
+                    # 1. PAUZA (12:00 DO 13:00)
+                    if vreme >= "12:00" and vreme < "13:00":
+                        st.markdown(
+                            f"""
+                            <div style="background-color: #2c2c2c; border: 2px solid #ff4b4b; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 6px;">
+                                <span style="color: #ff4b4b; font-weight: bold; font-size: 13px;">🚫 PAUZA</span>
+                            </div>
+                            """, 
+                            unsafe_allow_html=True
+                        )
+                        continue
 
-                # 2. ZAUZETI TERMIN
-                if ime is not None:
-                    st.markdown(
-                        f"""
-                        <div style="background-color: #a85a5a; border-radius: 8px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                            <span style="color: #ffffff; font-weight: bold; font-size: 16px;">🔴 {vreme} - Zauzeto</span>
-                        </div>
-                        """, 
-                        unsafe_allow_html=True
-                    )
-                else:
-                    # 3. SLOBODNI TERMIN (Dugme je široko koliko i tab, savršeno za telefon)
-                    if st.button(f"🟢 {vreme} - Slobodno", key=f"slot_{vreme}_{datum}", use_container_width=True):
-                        st.session_state['izabrani_termin'] = vreme
-                        st.rerun()
+                    # 2. ZAUZETI TERMIN
+                    if ime is not None:
+                        st.markdown(
+                            f"""
+                            <div style="background-color: #a85a5a; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 6px;">
+                                <span style="color: #ffffff; font-weight: bold; font-size: 13px;">🔴 {vreme}</span>
+                            </div>
+                            """, 
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        # 3. SLOBODNI TERMIN
+                        if st.button(f"🟢 {vreme}", key=f"slot_{vreme}_{datum}", use_container_width=True):
+                            st.session_state['izabrani_termin'] = vreme
+                            st.rerun()
 # --- ADMINISTRATORSKA FUNKCIJA (sa datumom) ---
 def admin_rucno_zakazi(datum):
     st.write("### ➕ Ručno zakazivanje")
