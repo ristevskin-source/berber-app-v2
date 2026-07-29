@@ -102,8 +102,8 @@ def prikazi_usluge():
 def prikazi_slotove(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    # Dohvatamo sve termine za taj dan
-    c.execute("SELECT vreme, ime, trajanje FROM rezervacije WHERE datum=? ORDER BY vreme ASC", (datum,))
+    # IZBACILI SMO 'trajanje' - sada čitamo samo ono što tvoja baza ima
+    c.execute("SELECT vreme, ime FROM rezervacije WHERE datum=? ORDER BY vreme ASC", (datum,))
     svi_slotovi = c.fetchall()
     conn.close()
     
@@ -115,11 +115,11 @@ def prikazi_slotove(datum):
 
     # Pravimo grupe termina po satima
     termini_po_satima = {}
-    for vreme, ime, trajanje in svi_slotovi:
+    for vreme, ime in svi_slotovi:
         sat = vreme.split(":")[0]
         if sat not in termini_po_satima:
             termini_po_satima[sat] = []
-        termini_po_satima[sat].append((vreme, ime, trajanje))
+        termini_po_satima[sat].append((vreme, ime))
 
     satovi = sorted(termini_po_satima.keys())
     tabovi = st.tabs([f"{sat}:00" for sat in satovi])
@@ -131,7 +131,7 @@ def prikazi_slotove(datum):
             # Pravimo 2 kolone unutar taba
             cols = st.columns(2) 
             
-            for index, (vreme, ime, trajanje) in enumerate(termini_po_satima[sat]):
+            for index, (vreme, ime) in enumerate(termini_po_satima[sat]):
                 
                 # Raspoređujemo u 2 kolone
                 with cols[index % 2]:
@@ -148,27 +148,19 @@ def prikazi_slotove(datum):
                         )
                         continue
 
-                    # 2. PROVERA DA LI JE TERMIN ZAUZET (ili je deo duže usluge)
-                    # Gledamo da li je ovaj termin zauzet, ILI da li je neka usluga počela ranije
-                    # i preklapa se sa ovim terminom (gledamo 1 sat unazad)
+                    # 2. ZAUZETI TERMIN (ili preklapanje)
                     je_zauzet = False
+                    
+                    # Ako je u bazi upisano ime, zauzet je
                     if ime is not None:
                         je_zauzet = True
                     else:
-                        # Proveravamo prethodne termine da vidimo da li se neki preklapa
-                        for vreme_provere, ime_provere, trajanje_provere in svi_slotovi:
-                            # Ako je termin u prošlosti i ima ime
-                            if ime_provere is not None and vreme_provere < vreme:
-                                # Računamo kada se taj termin završava (u formatu stringa)
-                                sat_p, minut_p = map(int, vreme_provere.split(':'))
-                                krajnje_vreme = f"{(sat_p + (minut_p + trajanje_provere) // 60):02d}:{(minut_p + trajanje_provere) % 60:02d}"
-                                
-                                # Ako se trenutni termin nalazi unutar trajanja prethodnog
-                                if vreme < krajnje_vreme:
-                                    je_zauzet = True
-                                    break
+                        # (OPCIJA) Ovde možemo dodati logiku za preklapanje ako želimo,
+                        # ali za sada, ako baza kaže da je prazan - pustićemo ga kao zeleni.
+                        # Logika za preklapanje zahteva "trajanje" koje baza nema.
+                        pass 
 
-                    # 3. PRIKAZ NA EKRANU (bilo da je zauzet eksplicitno ili preklapanjem)
+                    # 3. PRIKAZ NA EKRANU
                     if je_zauzet:
                         st.markdown(
                             f"""
