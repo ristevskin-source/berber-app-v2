@@ -60,9 +60,9 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
         for slot_vreme in slotovi:
             c.execute("""
                 UPDATE rezervacije 
-                SET ime=?, telefon=?, usluga=?, cena=?, trajanje=?
+                SET ime=?, telefon=?, usluga=?, cena=?
                 WHERE datum=? AND vreme=?
-            """, (ime, telefon, usluga_ime, usluga_cena, usluga_trajanje, datum, slot_vreme))
+            """, (ime, telefon, usluga_ime, usluga_cena, datum, slot_vreme))
 
         conn.commit()
         conn.close()
