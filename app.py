@@ -102,7 +102,8 @@ def prikazi_usluge():
 def prikazi_slotove(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    c.execute("SELECT vreme, ime FROM rezervacije WHERE datum=? ORDER BY vreme ASC", (datum,))
+    # Dohvatamo sve termine za taj dan
+    c.execute("SELECT vreme, ime, trajanje FROM rezervacije WHERE datum=? ORDER BY vreme ASC", (datum,))
     svi_slotovi = c.fetchall()
     conn.close()
     
@@ -114,28 +115,28 @@ def prikazi_slotove(datum):
 
     # Pravimo grupe termina po satima
     termini_po_satima = {}
-    for vreme, ime in svi_slotovi:
+    for vreme, ime, trajanje in svi_slotovi:
         sat = vreme.split(":")[0]
         if sat not in termini_po_satima:
             termini_po_satima[sat] = []
-        termini_po_satima[sat].append((vreme, ime))
+        termini_po_satima[sat].append((vreme, ime, trajanje))
 
     satovi = sorted(termini_po_satima.keys())
     tabovi = st.tabs([f"{sat}:00" for sat in satovi])
 
-    # Prikazujemo termine unutar svakog taba
+    # Prolazimo kroz svaki sat (tab)
     for i, sat in enumerate(satovi):
         with tabovi[i]:
             
-            # Pravimo 2 kolone unutar taba da termini stanu lepo na telefon
+            # Pravimo 2 kolone unutar taba
             cols = st.columns(2) 
             
-            for index, (vreme, ime) in enumerate(termini_po_satima[sat]):
+            for index, (vreme, ime, trajanje) in enumerate(termini_po_satima[sat]):
                 
-                # Raspoređujemo u 2 kolone unutar ovog sata
+                # Raspoređujemo u 2 kolone
                 with cols[index % 2]:
                     
-                    # 1. PAUZA (12:00 DO 13:00)
+                    # 1. PAUZA
                     if vreme >= "12:00" and vreme < "13:00":
                         st.markdown(
                             f"""
@@ -147,8 +148,28 @@ def prikazi_slotove(datum):
                         )
                         continue
 
-                    # 2. ZAUZETI TERMIN
+                    # 2. PROVERA DA LI JE TERMIN ZAUZET (ili je deo duže usluge)
+                    # Gledamo da li je ovaj termin zauzet, ILI da li je neka usluga počela ranije
+                    # i preklapa se sa ovim terminom (gledamo 1 sat unazad)
+                    je_zauzet = False
                     if ime is not None:
+                        je_zauzet = True
+                    else:
+                        # Proveravamo prethodne termine da vidimo da li se neki preklapa
+                        for vreme_provere, ime_provere, trajanje_provere in svi_slotovi:
+                            # Ako je termin u prošlosti i ima ime
+                            if ime_provere is not None and vreme_provere < vreme:
+                                # Računamo kada se taj termin završava (u formatu stringa)
+                                sat_p, minut_p = map(int, vreme_provere.split(':'))
+                                krajnje_vreme = f"{(sat_p + (minut_p + trajanje_provere) // 60):02d}:{(minut_p + trajanje_provere) % 60:02d}"
+                                
+                                # Ako se trenutni termin nalazi unutar trajanja prethodnog
+                                if vreme < krajnje_vreme:
+                                    je_zauzet = True
+                                    break
+
+                    # 3. PRIKAZ NA EKRANU (bilo da je zauzet eksplicitno ili preklapanjem)
+                    if je_zauzet:
                         st.markdown(
                             f"""
                             <div style="background-color: #a85a5a; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 6px;">
@@ -158,7 +179,7 @@ def prikazi_slotove(datum):
                             unsafe_allow_html=True
                         )
                     else:
-                        # 3. SLOBODNI TERMIN
+                        # 4. SLOBODNI TERMIN
                         if st.button(f"🟢 {vreme}", key=f"slot_{vreme}_{datum}", use_container_width=True):
                             st.session_state['izabrani_termin'] = vreme
                             st.rerun()
