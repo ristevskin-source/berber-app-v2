@@ -112,36 +112,40 @@ def prikazi_slotove(datum):
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
     
-    # Pravimo dve kolone. Telefon ih savršeno prikazuje levo-desno.
+    # Pravimo dve kolone za lep prikaz na telefonu
     cols = st.columns(2)
 
     for i, (vreme, ime) in enumerate(svi_slotovi):
         with cols[i % 2]: 
             
-            # 1. PAUZA
-            if vreme >= "12:00" and vreme < "13:00":
+            # 1. PAUZA (12:00 DO 13:00) - ISPRAVNO IZRAČUNATO
+            # Razbijamo vreme na sate i minute da bismo ih uporedili brojevima
+            sati, minuti = map(int, vreme.split(':'))
+            
+            # Ako je 12:00 ili više, a manje od 13:00 (dakle 12:00, 12:15, 12:30, 12:45)
+            if sati == 12 and minuti >= 0:
                 st.markdown(
                     f"""
-                    <div style="background-color: #2c2c2c; border: 2px solid #ff4b4b; border-radius: 10px; padding: 5px; text-align: center; margin-bottom: 8px;">
-                        <span style="color: #ff4b4b; font-weight: bold; font-size: 14px;">🚫 {vreme} PAUZA</span>
+                    <div style="background-color: #2c2c2c; border: 2px solid #ff4b4b; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 8px;">
+                        <span style="color: #ff4b4b; font-weight: bold;">🚫 PAUZA ({vreme})</span>
                     </div>
                     """, 
                     unsafe_allow_html=True
                 )
-                continue
+                continue # Preskačemo sve ispod za ovo vreme
 
             # 2. ZAUZETI TERMIN
             if ime is not None:
                 st.markdown(
                     f"""
-                    <div style="background-color: #a85a5a; border-radius: 10px; padding: 5px; text-align: center; margin-bottom: 8px;">
-                        <span style="color: #ffffff; font-weight: bold; font-size: 14px;">🔴 {vreme} (Zauzeto)</span>
+                    <div style="background-color: #a85a5a; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 8px;">
+                        <span style="color: #ffffff; font-weight: bold; font-size: 14px;">🔴 {vreme}</span>
                     </div>
                     """, 
                     unsafe_allow_html=True
                 )
             else:
-                # 3. SLOBODNI TERMIN - Običan, siguran Streamlit button
+                # 3. SLOBODNI TERMIN
                 if st.button(f"🟢 {vreme}", key=f"slot_{vreme}_{datum}", use_container_width=True):
                     st.session_state['izabrani_termin'] = vreme
                     st.rerun()
