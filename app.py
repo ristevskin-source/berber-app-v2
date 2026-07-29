@@ -111,44 +111,51 @@ def prikazi_slotove(datum):
         return
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
-    
-    # Pravimo dve kolone za lep prikaz na telefonu
-    cols = st.columns(2)
 
-    for i, (vreme, ime) in enumerate(svi_slotovi):
-        with cols[i % 2]: 
-            
-            # 1. PAUZA (12:00 DO 13:00) - ISPRAVNO IZRAČUNATO
-            # Razbijamo vreme na sate i minute da bismo ih uporedili brojevima
-            sati, minuti = map(int, vreme.split(':'))
-            
-            # Ako je 12:00 ili više, a manje od 13:00 (dakle 12:00, 12:15, 12:30, 12:45)
-            if sati == 12 and minuti >= 0:
-                st.markdown(
-                    f"""
-                    <div style="background-color: #2c2c2c; border: 2px solid #ff4b4b; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 8px;">
-                        <span style="color: #ff4b4b; font-weight: bold;">🚫 PAUZA ({vreme})</span>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
-                continue # Preskačemo sve ispod za ovo vreme
+    # Pravimo grupe termina po satima (npr. "09:00 - 09:45")
+    termini_po_satima = {}
+    for vreme, ime in svi_slotovi:
+        sat = vreme.split(":")[0] # Uzimamo samo prva dva broja (sat)
+        if sat not in termini_po_satima:
+            termini_po_satima[sat] = []
+        termini_po_satima[sat].append((vreme, ime))
 
-            # 2. ZAUZETI TERMIN
-            if ime is not None:
-                st.markdown(
-                    f"""
-                    <div style="background-color: #a85a5a; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 8px;">
-                        <span style="color: #ffffff; font-weight: bold; font-size: 14px;">🔴 {vreme}</span>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
-            else:
-                # 3. SLOBODNI TERMIN
-                if st.button(f"🟢 {vreme}", key=f"slot_{vreme}_{datum}", use_container_width=True):
-                    st.session_state['izabrani_termin'] = vreme
-                    st.rerun()
+    # Kreiramo tabove za svaki sat
+    satovi = sorted(termini_po_satima.keys())
+    tabovi = st.tabs([f"{sat}:00" for sat in satovi])
+
+    # Prikazujemo termine unutar svakog taba
+    for i, sat in enumerate(satovi):
+        with tabovi[i]:
+            for vreme, ime in termini_po_satima[sat]:
+                
+                # 1. PAUZA (12:00 DO 13:00)
+                if vreme >= "12:00" and vreme < "13:00":
+                    st.markdown(
+                        f"""
+                        <div style="background-color: #2c2c2c; border: 2px solid #ff4b4b; border-radius: 8px; padding: 10px; text-align: center; margin-bottom: 10px;">
+                            <span style="color: #ff4b4b; font-weight: bold; font-size: 16px;">🚫 PAUZA ({vreme})</span>
+                        </div>
+                        """, 
+                        unsafe_allow_html=True
+                    )
+                    continue
+
+                # 2. ZAUZETI TERMIN
+                if ime is not None:
+                    st.markdown(
+                        f"""
+                        <div style="background-color: #a85a5a; border-radius: 8px; padding: 10px; text-align: center; margin-bottom: 10px;">
+                            <span style="color: #ffffff; font-weight: bold; font-size: 16px;">🔴 {vreme} - Zauzeto</span>
+                        </div>
+                        """, 
+                        unsafe_allow_html=True
+                    )
+                else:
+                    # 3. SLOBODNI TERMIN (Dugme je široko koliko i tab, savršeno za telefon)
+                    if st.button(f"🟢 {vreme} - Slobodno", key=f"slot_{vreme}_{datum}", use_container_width=True):
+                        st.session_state['izabrani_termin'] = vreme
+                        st.rerun()
 # --- ADMINISTRATORSKA FUNKCIJA (sa datumom) ---
 def admin_rucno_zakazi(datum):
     st.write("### ➕ Ručno zakazivanje")
