@@ -112,39 +112,62 @@ def prikazi_slotove(datum):
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
     
-    # Pravimo 2 kolone - Ovo je idealno za mobilni telefon i neće se lomiti!
-    cols = st.columns(2)
+    # Počinjemo HTML kod za mrežu (4 kolone na kompu, 3 na telefonu)
+    html_kod = """
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; margin-bottom: 20px;">
+    """
+    
+    for vreme, ime in svi_slotovi:
+        # 1. PAUZA
+        if vreme >= "12:00" and vreme < "13:00":
+            html_kod += f"""
+            <div style="background-color: #222; border: 2px solid #ff4b4b; border-radius: 6px; padding: 8px 2px; text-align: center; font-size: 12px; color: #ff4b4b; font-weight: bold; grid-column: span 1;">
+                🚫 PAUZA
+            </div>
+            """
+            continue
 
-    for i, (vreme, ime) in enumerate(svi_slotovi):
-        with cols[i % 2]: # Sada se raspoređuje levo-desno (2 po 2)
+        # 2. ZAUZETO
+        if ime is not None:
+            html_kod += f"""
+            <div style="background-color: #b53b3b; border-radius: 6px; padding: 8px 2px; text-align: center; font-size: 13px; color: #fff; font-weight: bold; grid-column: span 1;">
+                {vreme}
+            </div>
+            """
+        else:
+            # 3. SLOBODNO - Pravimo HTML dugme koje poziva skriveno Streamlit dugme
+            key = f"slot_{vreme}_{datum}"
             
-            # 1. PAUZA - Zabrana ulaska
-            if vreme >= "12:00" and vreme < "13:00":
-                st.markdown(
-                    f"""
-                    <div style="background-color: #333333; border: 1px solid #ff4b4b; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 10px; font-size: 13px;">
-                        <span style="color: #ff4b4b; font-weight: bold;">🚫 PAUZA</span>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
-                continue
+            html_kod += f"""
+            <div style="grid-column: span 1;">
+                <div onclick="document.querySelector('button[data-testid=\\'baseButton-{key}\\']').click();" 
+                     style="background-color: #27ae60; border-radius: 6px; padding: 8px 2px; text-align: center; font-weight: bold; font-size: 13px; color: white; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                    🟢 {vreme}
+                </div>
+            </div>
+            """
+            # Ovo je Streamlit dugme koje je nevidljivo, ali ga HTML dugme iznad aktivira
+            st.button(f"Dummy_{vreme}", key=key)
 
-            # 2. ZAUZETI TERMIN
-            if ime is not None:
-                st.markdown(
-                    f"""
-                    <div style="background-color: #a85a5a; border-radius: 8px; padding: 8px 0; text-align: center; margin-bottom: 10px; font-size: 14px;">
-                        <span style="color: #ffffff; font-weight: bold;">{vreme}</span>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
-            else:
-                # 3. SLOBODNI TERMIN
-                if st.button(f"🟢 {vreme}", key=f"slot_{vreme}_{datum}"):
-                    st.session_state['izabrani_termin'] = vreme
-                    st.rerun()
+    html_kod += "</div>"
+    
+    # Dodajemo CSS pravilo da na telefonu (manjem od 600px) pređe u 3 kolone
+    html_kod += """
+    <style>
+        @media only screen and (max-width: 600px) {
+            div[style*="display: grid"] {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 5px !important;
+            }
+            div[style*="display: grid"] > div {
+                font-size: 11px !important;
+                padding: 6px 1px !important;
+            }
+        }
+    </style>
+    """
+    
+    st.markdown(html_kod, unsafe_allow_html=True)
 # --- ADMINISTRATORSKA FUNKCIJA (sa datumom) ---
 def admin_rucno_zakazi(datum):
     st.write("### ➕ Ručno zakazivanje")
