@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 st.set_page_config(page_title="Kod Kubanca", page_icon="✂️")
 
 # --- PRIKAZ LOGOA (Zameni "logo.png" sa tačnim imenom tvoje slike) ---
-st.image("logo.png", width=150)
+st.image("IMG-c75b1bbded411581450ad9e3374dbc68-V.jpg", width=300)
 
 # --- POMOĆNE FUNKCIJE ---
 def formatiraj_datum(datum):
