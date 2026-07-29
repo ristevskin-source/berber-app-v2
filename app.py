@@ -2,6 +2,36 @@ import streamlit as st
 import sqlite3
 from datetime import datetime, timedelta
 
+# --- DODATAK ZA MOBILNI PRIKAZ (4 KOLONE) ---
+st.markdown("""
+<style>
+    /* Ovo se aktivira SAMO na mobilnim telefonima (širina ekrana manja od 600px) */
+    @media only screen and (max-width: 600px) {
+        /* Smanjujemo margine i padding na minimum */
+        .stVerticalBlock {
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+            gap: 0.2rem !important;
+        }
+        
+        /* Teramo dugmiće da budu manji i da se lepo slože */
+        .stButton > button {
+            width: 100% !important;
+            padding: 4px 2px !important;
+            font-size: 11px !important;
+            min-height: 30px !important;
+        }
+
+        /* Smanjujemo širinu kolona da bi 4 mogle da stanu u jedan red */
+        .stColumn {
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+# --- KRAJ DODATKA ---
+
 # --- POMOĆNE FUNKCIJE (Dodate da sve radi odjednom) ---
 def formatiraj_datum(datum):
     return datum.strftime("%d.%m.%Y.")
