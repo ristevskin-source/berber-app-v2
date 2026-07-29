@@ -104,6 +104,7 @@ def prikazi_usluge():
 
 # --- FUNKCIJA ZA PRIKAZ SLOTOVA (HTML Mreža za mobilni) ---
 def prikazi_slotove(datum):
+
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
 
@@ -121,77 +122,59 @@ def prikazi_slotove(datum):
 
     st.write("### ⏰ Korak 2: Odaberite vreme")
 
-    # Grupisanje po satima
-    termini_po_satima = {}
+    red = []
 
     for vreme, ime in svi_slotovi:
-        sat = vreme.split(":")[0]
 
-        if sat not in termini_po_satima:
-            termini_po_satima[sat] = []
-
-        termini_po_satima[sat].append((vreme, ime))
-
-
-    # Mobilni prikaz - jedan red ispod drugog
-    for sat in sorted(termini_po_satima.keys()):
-
-        st.write(f"**{sat}:00**")
-
-        for vreme, ime in termini_po_satima[sat]:
-
-            # PAUZA
-            if "12:00" <= vreme < "13:00":
-                st.markdown(
-                    """
-                    <div style="
-                    background-color:#2c2c2c;
-                    border:2px solid #ff4b4b;
-                    border-radius:8px;
-                    padding:10px;
-                    text-align:center;
-                    margin-bottom:8px;">
-                    <span style="color:#ff4b4b;font-weight:bold;">
-                    🚫 PAUZA
-                    </span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-                continue
+        if "12:00" <= vreme < "13:00":
+            red.append("PAUZA")
+        elif ime is not None:
+            red.append(f"🔴 {vreme}")
+        else:
+            red.append(vreme)
 
 
-            # ZAUZET TERMIN
-            je_zauzet = ime is not None
+    for i in range(0, len(red), 3):
 
+        kolone = st.columns(3)
 
-            if je_zauzet:
+        for j in range(3):
 
-                st.markdown(
-                    f"""
-                    <div style="
-                    background-color:#a85a5a;
-                    border-radius:8px;
-                    padding:10px;
-                    text-align:center;
-                    margin-bottom:8px;">
-                    <span style="color:white;font-weight:bold;">
-                    🔴 {vreme}
-                    </span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+            index = i + j
 
-            else:
+            if index < len(red):
 
-                if st.button(
-                    f"🟢 Slobodno {vreme}",
-                    key=f"slot_{vreme}_{datum}",
-                    use_container_width=True
-                ):
-                    st.session_state['izabrani_termin'] = vreme
-                    st.rerun()
+                termin = red[index]
+
+                with kolone[j]:
+
+                    if termin == "PAUZA":
+
+                        st.button(
+                            "🚫 PAUZA",
+                            disabled=True,
+                            use_container_width=True,
+                            key=f"pauza_{i}_{j}"
+                        )
+
+                    elif termin.startswith("🔴"):
+
+                        st.button(
+                            termin,
+                            disabled=True,
+                            use_container_width=True,
+                            key=f"zauzet_{termin}"
+                        )
+
+                    else:
+
+                        if st.button(
+                            f"🟢 {termin}",
+                            key=f"slot_{termin}_{datum}",
+                            use_container_width=True
+                        ):
+                            st.session_state['izabrani_termin'] = termin
+                            st.rerun()
 # --- ADMINISTRATORSKA FUNKCIJA (sa datumom) ---
 def admin_rucno_zakazi(datum):
     st.write("### ➕ Ručno zakazivanje")
