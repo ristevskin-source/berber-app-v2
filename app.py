@@ -65,8 +65,9 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
         conn.commit()
         conn.close()
         return True
-    except Exception as e:
-        return False
+   except Exception as e:
+    st.error(e)
+    return False
 
 # --- FUNKCIJA ZA PRIKAZ USLUGA (2 kolone za mobilni) ---
 def prikazi_usluge():
