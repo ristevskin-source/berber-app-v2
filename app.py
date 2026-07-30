@@ -169,7 +169,7 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
 
     return potrebni_slotovi
     def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usluga_trajanje):
-    try:
+        try:
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
 
