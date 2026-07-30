@@ -375,9 +375,7 @@ with tab1:
 
                         
 
-                        if odustani:
-                          st.session_state['izabrani_termin'] = None
-                          st.rerun()
+                    
                         else:
                             st.success(f"✅ Usluga **{usluga['ime']}** traje **{usluga['trajanje']} min** i zauzima **{len(slotovi)} slotova**.")
                             st.write("Zauzeće sledeće slotove:")
