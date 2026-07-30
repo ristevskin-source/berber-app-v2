@@ -26,8 +26,7 @@ def osvezi_termine():
 def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    c.execute("SELECT name FROM sqlite_master WHERE type='table'")
-st.write("Tabele u bazi:", c.fetchall())
+
     c.execute("SELECT vreme, ime FROM rezervacije WHERE datum=? ORDER BY vreme ASC", (datum,))
     svi_slotovi = c.fetchall()
     conn.close()
