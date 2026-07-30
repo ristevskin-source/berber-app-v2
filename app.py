@@ -43,8 +43,6 @@ def init_db():
     conn.close()
 
 
-init_db()
-osvezi_termine()
 def generisi_slotove_za_dan(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
