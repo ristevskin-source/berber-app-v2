@@ -374,6 +374,7 @@ with tab1:
 
     if st.session_state['booking_success']:
         detalji = st.session_state['booking_details']
+        st.write(detalji)
         st.balloons()
         st.markdown(f"""
         <div style="background-color: #3a3a3a; padding: 20px; border-radius: 15px; border-left: 6px solid #d4af37; box-shadow: 0 4px 12px rgba(0,0,0,0.5); margin: 20px 0;">
