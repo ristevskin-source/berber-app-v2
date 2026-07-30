@@ -151,21 +151,29 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
         st.error(e)
         return False
 
-# --- ADMIN FUNKCIJE ZA METRIKE (sa parametrom datum) ---
-def get_bookings_count_for_date(datum):
+# --- ADMIN FUNKCIJE ZA METRIKE ---
+def get_unique_clients_count_for_date(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM rezervacije WHERE datum=? AND ime IS NOT NULL", (datum,))
+    c.execute("""
+        SELECT COUNT(DISTINCT ime || '|' || telefon || '|' || usluga || '|' || cena)
+        FROM rezervacije
+        WHERE datum=? AND ime IS NOT NULL
+    """, (datum,))
     count = c.fetchone()[0]
     conn.close()
     return count
 
-def get_next_7_days_bookings_count():
+def get_unique_clients_count_next_7_days():
     today = datetime.now().date()
     end_date = today + timedelta(days=6)
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM rezervacije WHERE datum BETWEEN ? AND ? AND ime IS NOT NULL", (today, end_date))
+    c.execute("""
+        SELECT COUNT(DISTINCT ime || '|' || telefon || '|' || usluga || '|' || cena)
+        FROM rezervacije
+        WHERE datum BETWEEN ? AND ? AND ime IS NOT NULL
+    """, (today, end_date))
     count = c.fetchone()[0]
     conn.close()
     return count
@@ -458,13 +466,13 @@ with tab1:
         
         if datumi_raw:
             osvezi_termine()
-            # FORSIRANO prikazujemo prvi datum (danas) sa key da ne pamti staro
+            # Forsirano prikazujemo prvi datum (danas) sa key da ne pamti staro
             datum = st.selectbox(
                 "Datum",
                 datumi_raw,
                 index=0,
                 format_func=formatiraj_datum,
-                key="klijent_datum_select"  # <-- DODAT KEY da ne pamti staru vrednost
+                key="klijent_datum_select"
             )
             st.info(f"📅 Termini za: {formatiraj_datum(datum)}")
             
@@ -523,7 +531,7 @@ with tab1:
             st.error("❌ Nema dostupnih datuma.")
 
 # ============================================================
-# TAB 2: ADMIN PANEL (sa izborom datuma)
+# TAB 2: ADMIN PANEL
 # ============================================================
 with tab2:
     if not st.session_state['admin_authenticated']:
@@ -562,7 +570,6 @@ with tab2:
         # --- ADMIN IZBOR DATUMA ZA PREGLED ---
         st.write("## 📅 Odaberite datum za pregled")
         
-        # Generišemo datume za admina (od danas + 7 dana)
         admin_datumi = generisi_datume()
         
         admin_datum = st.selectbox(
@@ -573,7 +580,6 @@ with tab2:
             key="admin_datum_select"
         )
         
-        # Čuvamo u session_state da bi metrike koristile isti datum
         st.session_state['admin_selected_date'] = admin_datum
         
         st.write("---")
@@ -582,9 +588,9 @@ with tab2:
         # Metrike za izabrani datum
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("📅 Zakazano za izabrani dan", get_bookings_count_for_date(admin_datum))
+            st.metric("📅 Zakazano za izabrani dan", get_unique_clients_count_for_date(admin_datum))
         with col2:
-            st.metric("📆 Zakazano u narednih 7 dana", get_next_7_days_bookings_count())
+            st.metric("📆 Zakazano u narednih 7 dana", get_unique_clients_count_next_7_days())
         
         col3, col4 = st.columns(2)
         with col3:
@@ -617,7 +623,7 @@ with tab2:
         st.write("---")
         st.write(f"## 📋 Termini za {formatiraj_datum(admin_datum)}")
         
-        # Učitavanje termina za IZABRANI datum (ne samo danas)
+        # Učitavanje termina za IZABRANI datum
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
         c.execute("""
