@@ -168,6 +168,33 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
 
 
     return potrebni_slotovi
+    def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usluga_trajanje):
+    try:
+        conn = sqlite3.connect('termini.db')
+        c = conn.cursor()
+
+        for slot_vreme in slotovi:
+            c.execute("""
+                UPDATE rezervacije
+                SET ime=?, telefon=?, usluga=?, cena=?
+                WHERE datum=? AND vreme=?
+            """, (
+                ime,
+                telefon,
+                usluga_ime,
+                usluga_cena,
+                datum,
+                slot_vreme
+            ))
+
+        conn.commit()
+        conn.close()
+
+        return True
+
+    except Exception as e:
+        st.error(e)
+        return False
 # --- FUNKCIJA ZA PRIKAZ USLUGA (2 kolone za mobilni) ---
 def prikazi_usluge():
     conn = sqlite3.connect('termini.db')
