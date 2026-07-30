@@ -99,11 +99,38 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
 
-    c.execute("SELECT vreme, ime FROM rezervacije WHERE datum=? ORDER BY vreme ASC", (datum,))
+    c.execute(
+        "SELECT vreme, ime FROM rezervacije WHERE datum=? ORDER BY vreme ASC",
+        (datum,)
+    )
+
     svi_slotovi = c.fetchall()
     conn.close()
 
+    pocetak = datetime.strptime(
+        f"{datum} {vreme}",
+        "%Y-%m-%d %H:%M"
+    )
+
+    kraj = pocetak + timedelta(minutes=trajanje)
+
+    # PROVERA PAUZE 12:00 - 13:00
+    pauza_pocetak = datetime.strptime(
+        f"{datum} 12:00",
+        "%Y-%m-%d %H:%M"
+    )
+
+    pauza_kraj = datetime.strptime(
+        f"{datum} 13:00",
+        "%Y-%m-%d %H:%M"
+    )
+
+    if pocetak < pauza_kraj and kraj > pauza_pocetak:
+        return None
+
+
     start_index = None
+
     for i, (slot_vreme, ime) in enumerate(svi_slotovi):
         if slot_vreme == vreme:
             start_index = i
@@ -112,39 +139,35 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     if start_index is None:
         return None
 
+
     broj_slotova = trajanje // 15
+
     if start_index + broj_slotova > len(svi_slotovi):
         return None
 
+
     potrebni_slotovi = []
+
     for i in range(broj_slotova):
+
         slot_vreme, ime = svi_slotovi[start_index + i]
+
         if ime is not None:
             return None
+
+        # dodatna zaštita da ne uđe u pauzu
+        slot_datetime = datetime.strptime(
+            f"{datum} {slot_vreme}",
+            "%Y-%m-%d %H:%M"
+        )
+
+        if pauza_pocetak <= slot_datetime < pauza_kraj:
+            return None
+
         potrebni_slotovi.append(slot_vreme)
 
+
     return potrebni_slotovi
-
-def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usluga_trajanje):
-    try:
-        conn = sqlite3.connect('termini.db')
-        c = conn.cursor()
-
-        for slot_vreme in slotovi:
-            c.execute("""
-                UPDATE rezervacije 
-                SET ime=?, telefon=?, usluga=?, cena=?
-                WHERE datum=? AND vreme=?
-            """, (ime, telefon, usluga_ime, usluga_cena, datum, slot_vreme))
-
-        conn.commit()
-        conn.close()
-        return True
-
-    except Exception as e:
-        st.error(e)
-        return False
-
 # --- FUNKCIJA ZA PRIKAZ USLUGA (2 kolone za mobilni) ---
 def prikazi_usluge():
     conn = sqlite3.connect('termini.db')
