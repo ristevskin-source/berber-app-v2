@@ -460,7 +460,7 @@ with tab1:
         
         if datumi_raw:
             osvezi_termine()
-            datum = st.selectbox("Datum", datumi_raw, format_func=formatiraj_datum)
+            datum = st.selectbox("Datum", datumi_raw, index=0, format_func=formatiraj_datum)
             st.info(f"📅 Termini za: {formatiraj_datum(datum)}")
             
             prikazi_usluge()
