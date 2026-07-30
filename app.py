@@ -43,7 +43,6 @@ def init_db():
         usluge
     )
 
-    # Dodavanje kolona ako ne postoje
     try:
         c.execute("ALTER TABLE rezervacije ADD COLUMN status TEXT DEFAULT 'zakazan'")
     except sqlite3.OperationalError:
@@ -96,7 +95,7 @@ def formatiraj_datum(datum):
 def generisi_datume():
     danas = datetime.now().date()
     datumi = []
-    for i in range(0, 7):  # 7 dana unapred
+    for i in range(0, 7):
         datumi.append(danas + timedelta(days=i))
     return datumi
 
@@ -152,11 +151,11 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
         st.error(e)
         return False
 
-# --- ADMIN FUNKCIJE ZA METRIKE ---
-def get_today_bookings_count():
+# --- ADMIN FUNKCIJE ZA METRIKE (sa parametrom datum) ---
+def get_bookings_count_for_date(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM rezervacije WHERE datum=? AND ime IS NOT NULL", (datetime.now().date(),))
+    c.execute("SELECT COUNT(*) FROM rezervacije WHERE datum=? AND ime IS NOT NULL", (datum,))
     count = c.fetchone()[0]
     conn.close()
     return count
@@ -171,8 +170,7 @@ def get_next_7_days_bookings_count():
     conn.close()
     return count
 
-def get_today_earnings_breakdown():
-    today = datetime.now().date()
+def get_earnings_breakdown_for_date(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     c.execute("""
@@ -180,7 +178,7 @@ def get_today_earnings_breakdown():
         FROM rezervacije 
         WHERE datum=? AND status='naplacen'
         GROUP BY payment_method
-    """, (today,))
+    """, (datum,))
     results = c.fetchall()
     conn.close()
     kes = 0
@@ -340,14 +338,13 @@ def prikazi_slotove(datum):
                             st.session_state['izabrani_termin'] = termin
                             st.rerun()
 
-def admin_rucno_zakazi(datum):
+def admin_rucno_zakazi():
     st.write("### ➕ Ručno zakazivanje")
     
     with st.form(key="admin_zakazi_form"):
         ime = st.text_input("Ime i prezime *")
         telefon = st.text_input("Telefon *")
         
-        # Onemogućeno biranje datuma pre danas
         datum = st.date_input(
             "Odaberi datum za uslugu",
             value=datetime.now().date(),
@@ -420,6 +417,8 @@ if 'admin_password' not in st.session_state:
     st.session_state['admin_password'] = 'admin123'
 if 'naplata_id' not in st.session_state:
     st.session_state['naplata_id'] = None
+if 'admin_selected_date' not in st.session_state:
+    st.session_state['admin_selected_date'] = datetime.now().date()
 
 # Logo
 st.image("IMG-c75b1bbded411581450ad9e3374dbc68-V.jpg", width=300)
@@ -455,12 +454,18 @@ with tab1:
             st.session_state['izabrani_termin'] = None
             st.rerun()
     else:
-        # Generišemo datume OD DANAS
         datumi_raw = generisi_datume()
         
         if datumi_raw:
             osvezi_termine()
-            datum = st.selectbox("Datum", datumi_raw, index=0, format_func=formatiraj_datum)
+            # FORSIRANO prikazujemo prvi datum (danas) sa key da ne pamti staro
+            datum = st.selectbox(
+                "Datum",
+                datumi_raw,
+                index=0,
+                format_func=formatiraj_datum,
+                key="klijent_datum_select"  # <-- DODAT KEY da ne pamti staru vrednost
+            )
             st.info(f"📅 Termini za: {formatiraj_datum(datum)}")
             
             prikazi_usluge()
@@ -518,10 +523,9 @@ with tab1:
             st.error("❌ Nema dostupnih datuma.")
 
 # ============================================================
-# TAB 2: ADMIN PANEL (sa grupisanjem u tabeli)
+# TAB 2: ADMIN PANEL (sa izborom datuma)
 # ============================================================
 with tab2:
-    # Provera lozinke
     if not st.session_state['admin_authenticated']:
         st.write("### 🔐 Admin pristup")
         password = st.text_input("Unesite lozinku", type="password")
@@ -551,19 +555,37 @@ with tab2:
                     st.error("Stara lozinka nije tačna")
 
         # Ručno zakazivanje
-        admin_rucno_zakazi(datetime.now().date())
+        admin_rucno_zakazi()
         
         st.write("---")
-        st.write("## 📊 Finansijski pregled")
         
-        # Prva dva reda - broj zakazanih
+        # --- ADMIN IZBOR DATUMA ZA PREGLED ---
+        st.write("## 📅 Odaberite datum za pregled")
+        
+        # Generišemo datume za admina (od danas + 7 dana)
+        admin_datumi = generisi_datume()
+        
+        admin_datum = st.selectbox(
+            "Izaberite datum za pregled termina",
+            admin_datumi,
+            index=0,
+            format_func=formatiraj_datum,
+            key="admin_datum_select"
+        )
+        
+        # Čuvamo u session_state da bi metrike koristile isti datum
+        st.session_state['admin_selected_date'] = admin_datum
+        
+        st.write("---")
+        st.write(f"## 📊 Finansijski pregled za {formatiraj_datum(admin_datum)}")
+        
+        # Metrike za izabrani datum
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("📅 Zakazano danas", get_today_bookings_count())
+            st.metric("📅 Zakazano za izabrani dan", get_bookings_count_for_date(admin_datum))
         with col2:
             st.metric("📆 Zakazano u narednih 7 dana", get_next_7_days_bookings_count())
         
-        # Drugi red - mesečni i godišnji pazar (sa raščlanjenjem)
         col3, col4 = st.columns(2)
         with col3:
             st.write("**💰 Mesečni pazar**")
@@ -578,12 +600,12 @@ with tab2:
             st.write(f"Kartica: {ka:,.0f} din")
             st.write(f"**Ukupno: {uk:,.0f} din**")
         
-        # Dnevni pazar (box)
+        # Dnevni pazar za izabrani datum
         st.markdown("---")
-        ukupno, kes, kartica = get_today_earnings_breakdown()
+        ukupno, kes, kartica = get_earnings_breakdown_for_date(admin_datum)
         st.markdown(f"""
         <div style="background-color: #1e1e1e; padding: 20px; border-radius: 10px; border: 2px solid #d4af37; text-align: center;">
-            <h3 style="color: #d4af37;">💵 Dnevni pazar (do sada)</h3>
+            <h3 style="color: #d4af37;">💵 Pazar za {formatiraj_datum(admin_datum)} (do sada)</h3>
             <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 10px;">
                 <div><span style="color: #aaa;">Keš:</span> <strong>{kes:,.0f} din</strong></div>
                 <div><span style="color: #aaa;">Kartica:</span> <strong>{kartica:,.0f} din</strong></div>
@@ -593,9 +615,9 @@ with tab2:
         """, unsafe_allow_html=True)
         
         st.write("---")
-        st.write("## 📋 Termini za danas")
+        st.write(f"## 📋 Termini za {formatiraj_datum(admin_datum)}")
         
-        # Učitavanje svih termina za danas
+        # Učitavanje termina za IZABRANI datum (ne samo danas)
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
         c.execute("""
@@ -604,7 +626,7 @@ with tab2:
             WHERE datum=?
             AND ime IS NOT NULL
             ORDER BY vreme ASC
-        """, (datetime.now().date(),))
+        """, (admin_datum,))
         rows = c.fetchall()
         conn.close()
         
@@ -681,4 +703,4 @@ with tab2:
                                     st.rerun()
                     st.markdown("---")
         else:
-            st.info("Nema zakazanih klijenata za danas.")
+            st.info(f"Nema zakazanih klijenata za {formatiraj_datum(admin_datum)}.")
