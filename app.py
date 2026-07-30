@@ -43,7 +43,7 @@ def init_db():
         usluge
     )
 
-    # Dodavanje kolona ako ne postoje (za stare baze)
+    # Dodavanje kolona ako ne postoje
     try:
         c.execute("ALTER TABLE rezervacije ADD COLUMN status TEXT DEFAULT 'zakazan'")
     except sqlite3.OperationalError:
@@ -455,15 +455,11 @@ with tab1:
             st.session_state['izabrani_termin'] = None
             st.rerun()
     else:
-        conn = sqlite3.connect('termini.db')
-        c = conn.cursor()
         # Generišemo datume OD DANAS
         datumi_raw = generisi_datume()
-        conn.close()
         
         if datumi_raw:
             osvezi_termine()
-            # Selectbox prikazuje samo datume iz liste (koja počinje od danas)
             datum = st.selectbox("Datum", datumi_raw, format_func=formatiraj_datum)
             st.info(f"📅 Termini za: {formatiraj_datum(datum)}")
             
@@ -613,7 +609,7 @@ with tab2:
         conn.close()
         
         if rows:
-            # Grupisanje po (ime, telefon, usluga, cena) - jer isti klijent može imati više slotova
+            # Grupisanje po (ime, telefon, usluga, cena)
             grupe = {}
             for id, vreme, ime, telefon, usluga, cena, status, payment_method in rows:
                 key = (ime, telefon, usluga, cena)
@@ -626,21 +622,16 @@ with tab2:
                     }
                 grupe[key]['vremena'].append(vreme)
                 grupe[key]['ids'].append(id)
-                # Ako je neki od slotova naplaćen, a neki nije (ne bi trebalo), uzimamo prvi status
-                # ali za svaki slučaj, ako je bilo koji naplaćen, postavljamo na naplaćen (mada će svi biti isti)
                 if status == 'naplacen':
                     grupe[key]['status'] = 'naplacen'
                     grupe[key]['payment_method'] = payment_method
-                # Ako je neki otkazan, ali to se ne bi trebalo desiti jer su otkazani svi slotovi zajedno
             
-            # Prikazivanje grupisanih redova
             for (ime, telefon, usluga, cena), data in grupe.items():
                 vremena = sorted(data['vremena'])
                 ids = data['ids']
                 status = data['status']
                 payment_method = data['payment_method']
                 
-                # Opseg vremena
                 if len(vremena) == 1:
                     vreme_prikaz = vremena[0]
                 else:
@@ -658,21 +649,18 @@ with tab2:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
                         if status == 'zakazan':
-                            # Dugme za otkazivanje cele grupe
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
                                     otkazi_termin(id)
                                 st.rerun()
-                            # Dugme za naplatu cele grupe
                             if st.button("💰 Naplati", key=f"naplati_grupa_{ids[0]}"):
-                                st.session_state['naplata_id'] = ids  # čuvamo listu ID-jeva
+                                st.session_state['naplata_id'] = ids
                                 st.rerun()
                         elif status == 'naplacen':
                             st.success(f"✅ Naplaćeno ({payment_method})")
                         elif status == 'otkazan':
                             st.warning("❌ Otkazano")
                     with cols[5]:
-                        # Ako je trenutno otvoren dijalog za naplatu za ovu grupu
                         if status == 'zakazan' and st.session_state.get('naplata_id') == ids:
                             payment_choice = st.radio(
                                 "Način plaćanja",
