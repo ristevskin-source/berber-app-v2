@@ -44,6 +44,7 @@ def init_db():
 
 
 init_db()
+osvezi_termine()
 def generisi_slotove_za_dan(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -91,8 +92,10 @@ def generisi_datume():
     return datumi
 
 def osvezi_termine():
-    pass # Mesto za logiku ako ti treba osvežavanje
+    datumi = generisi_datume()
 
+    for datum in datumi:
+        generisi_slotove_za_dan(datum)
 # --- GLAVNE FUNKCIJE ---
 def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     conn = sqlite3.connect('termini.db')
