@@ -4,6 +4,46 @@ from datetime import datetime, timedelta
 
 # --- PODEŠAVANJE STRANICE ---
 st.set_page_config(page_title="Kod Kubanca", page_icon="✂️")
+def init_db():
+    conn = sqlite3.connect('termini.db')
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE IF NOT EXISTS rezervacije (
+        id INTEGER PRIMARY KEY,
+        usluga TEXT,
+        datum TEXT,
+        vreme TEXT,
+        ime TEXT,
+        telefon TEXT,
+        cena INTEGER
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS cenovnik (
+        usluga TEXT PRIMARY KEY,
+        cena INTEGER,
+        trajanje INTEGER
+    )''')
+
+    usluge = [
+        ('💇 Šišanje', 1500, 45),
+        ('💇 Šišanje + pranje kose', 1900, 60),
+        ('💇 Šišanje + brada', 2000, 60),
+        ('💇 Šišanje + brada + pranje kose', 2400, 75),
+        ('💇 Šišanje + brada + pranje kose + obrve', 2800, 90),
+        ('🧔 Brada (samo)', 1000, 30),
+        ('✨ Obrve (samo)', 400, 15)
+    ]
+
+    c.executemany(
+        "INSERT OR IGNORE INTO cenovnik (usluga, cena, trajanje) VALUES (?, ?, ?)",
+        usluge
+    )
+
+    conn.commit()
+    conn.close()
+
+
+init_db()
 
 # --- PRIKAZ LOGOA (Zameni "logo.png" sa tačnim imenom tvoje slike) ---
 st.image("IMG-c75b1bbded411581450ad9e3374dbc68-V.jpg", width=300)
