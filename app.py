@@ -43,7 +43,7 @@ def init_db():
         usluge
     )
 
-    # Dodajemo kolone ako ne postoje (za stare baze)
+    # Dodavanje kolona ako ne postoje (za stare baze)
     try:
         c.execute("ALTER TABLE rezervacije ADD COLUMN status TEXT DEFAULT 'zakazan'")
     except sqlite3.OperationalError:
@@ -96,13 +96,12 @@ def formatiraj_datum(datum):
 def generisi_datume():
     danas = datetime.now().date()
     datumi = []
-    for i in range(0, 14):  # Generiše termine za narednih 14 dana
+    for i in range(0, 7):  # 7 dana unapred
         datumi.append(danas + timedelta(days=i))
     return datumi
 
 def osvezi_termine():
     datumi = generisi_datume()
-
     for datum in datumi:
         generisi_slotove_za_dan(datum)
 
@@ -110,7 +109,6 @@ def osvezi_termine():
 def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-
     c.execute("SELECT vreme, ime FROM rezervacije WHERE datum=? ORDER BY vreme ASC", (datum,))
     svi_slotovi = c.fetchall()
     conn.close()
@@ -141,23 +139,20 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
     try:
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
-
         for slot_vreme in slotovi:
             c.execute("""
                 UPDATE rezervacije 
                 SET ime=?, telefon=?, usluga=?, cena=?, status='zakazan'
                 WHERE datum=? AND vreme=?
             """, (ime, telefon, usluga_ime, usluga_cena, datum, slot_vreme))
-
         conn.commit()
         conn.close()
         return True
-
     except Exception as e:
         st.error(e)
         return False
 
-# --- ADMIN FUNKCIJE ZA METRIKE I AKCIJE ---
+# --- ADMIN FUNKCIJE ZA METRIKE ---
 def get_today_bookings_count():
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -176,6 +171,28 @@ def get_next_7_days_bookings_count():
     conn.close()
     return count
 
+def get_today_earnings_breakdown():
+    today = datetime.now().date()
+    conn = sqlite3.connect('termini.db')
+    c = conn.cursor()
+    c.execute("""
+        SELECT payment_method, SUM(cena) 
+        FROM rezervacije 
+        WHERE datum=? AND status='naplacen'
+        GROUP BY payment_method
+    """, (today,))
+    results = c.fetchall()
+    conn.close()
+    kes = 0
+    kartica = 0
+    for method, total in results:
+        if method == 'Keš':
+            kes = total if total else 0
+        elif method == 'Kartica':
+            kartica = total if total else 0
+    ukupno = kes + kartica
+    return ukupno, kes, kartica
+
 def get_monthly_earnings_breakdown():
     today = datetime.now().date()
     first_day = today.replace(day=1)
@@ -189,7 +206,6 @@ def get_monthly_earnings_breakdown():
     """, (first_day, today))
     results = c.fetchall()
     conn.close()
-    
     kes = 0
     kartica = 0
     for method, total in results:
@@ -213,7 +229,6 @@ def get_yearly_earnings_breakdown():
     """, (first_day, today))
     results = c.fetchall()
     conn.close()
-    
     kes = 0
     kartica = 0
     for method, total in results:
@@ -224,29 +239,7 @@ def get_yearly_earnings_breakdown():
     ukupno = kes + kartica
     return ukupno, kes, kartica
 
-def get_today_earnings_breakdown():
-    today = datetime.now().date()
-    conn = sqlite3.connect('termini.db')
-    c = conn.cursor()
-    c.execute("""
-        SELECT payment_method, SUM(cena) 
-        FROM rezervacije 
-        WHERE datum=? AND status='naplacen'
-        GROUP BY payment_method
-    """, (today,))
-    results = c.fetchall()
-    conn.close()
-    
-    kes = 0
-    kartica = 0
-    for method, total in results:
-        if method == 'Keš':
-            kes = total if total else 0
-        elif method == 'Kartica':
-            kartica = total if total else 0
-    ukupno = kes + kartica
-    return ukupno, kes, kartica
-
+# --- ADMIN FUNKCIJE ZA AKCIJE ---
 def otkazi_termin(rezervacija_id):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -265,7 +258,7 @@ def naplati_termin(rezervacija_id, payment_method):
     conn.commit()
     conn.close()
 
-# --- FUNKCIJA ZA PRIKAZ USLUGA (2 kolone za mobilni) ---
+# --- FUNKCIJE ZA KLIJENTSKI DEO ---
 def prikazi_usluge():
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -277,13 +270,11 @@ def prikazi_usluge():
     st.write("---")
     
     cols = st.columns(2)
-    
     for i, u in enumerate(usluge):
         with cols[i % 2]:
             ime_usluge, cena, trajanje = u
             st.markdown(f"**{ime_usluge}**")
             st.caption(f"{trajanje} min • {cena} din")
-            
             if st.button(f"Izaberi", key=f"usl_{i}"):
                 st.session_state['izabrana_usluga'] = {
                     'ime': ime_usluge,
@@ -294,16 +285,13 @@ def prikazi_usluge():
                 st.rerun()
             st.write("---")
 
-# --- FUNKCIJA ZA PRIKAZ SLOTOVA ---
 def prikazi_slotove(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-
     c.execute(
         "SELECT vreme, ime FROM rezervacije WHERE datum=? ORDER BY vreme ASC",
         (datum,)
     )
-
     svi_slotovi = c.fetchall()
     conn.close()
 
@@ -314,7 +302,6 @@ def prikazi_slotove(datum):
     st.write("### ⏰ Korak 2: Odaberite vreme")
 
     red = []
-
     for vreme, ime in svi_slotovi:
         if "12:00" <= vreme < "13:00":
             red.append("PAUZA")
@@ -353,14 +340,19 @@ def prikazi_slotove(datum):
                             st.session_state['izabrani_termin'] = termin
                             st.rerun()
 
-# --- ADMINISTRATORSKA FUNKCIJA (ručno zakazivanje) ---
 def admin_rucno_zakazi(datum):
     st.write("### ➕ Ručno zakazivanje")
     
     with st.form(key="admin_zakazi_form"):
         ime = st.text_input("Ime i prezime *")
         telefon = st.text_input("Telefon *")
-        datum = st.date_input("Odaberi datum za uslugu", value=datetime.now().date())
+        
+        # Onemogućeno biranje datuma pre danas
+        datum = st.date_input(
+            "Odaberi datum za uslugu",
+            value=datetime.now().date(),
+            min_value=datetime.now().date()
+        )
         
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
@@ -415,6 +407,7 @@ def admin_rucno_zakazi(datum):
 
 init_db()
 
+# Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
     st.session_state['izabrana_usluga'] = None
 if 'izabrani_termin' not in st.session_state:
@@ -428,12 +421,14 @@ if 'admin_password' not in st.session_state:
 if 'naplata_id' not in st.session_state:
     st.session_state['naplata_id'] = None
 
+# Logo
 st.image("IMG-c75b1bbded411581450ad9e3374dbc68-V.jpg", width=300)
 
+# Tabovi
 tab1, tab2 = st.tabs(["📅 Zakazivanje", "🔑 Admin Panel"])
 
 # ============================================================
-# TAB 1: ZAKAZIVANJE (klijentski deo)
+# TAB 1: KLIJENTSKI DEO
 # ============================================================
 with tab1:
     if 'izabrana_usluga' in st.session_state and not isinstance(st.session_state['izabrana_usluga'], (dict, type(None))):
@@ -462,12 +457,13 @@ with tab1:
     else:
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
+        # Generišemo datume OD DANAS
         datumi_raw = generisi_datume()
         conn.close()
         
         if datumi_raw:
             osvezi_termine()
-            
+            # Selectbox prikazuje samo datume iz liste (koja počinje od danas)
             datum = st.selectbox("Datum", datumi_raw, format_func=formatiraj_datum)
             st.info(f"📅 Termini za: {formatiraj_datum(datum)}")
             
@@ -526,9 +522,10 @@ with tab1:
             st.error("❌ Nema dostupnih datuma.")
 
 # ============================================================
-# TAB 2: ADMIN PANEL
+# TAB 2: ADMIN PANEL (sa grupisanjem u tabeli)
 # ============================================================
 with tab2:
+    # Provera lozinke
     if not st.session_state['admin_authenticated']:
         st.write("### 🔐 Admin pristup")
         password = st.text_input("Unesite lozinku", type="password")
@@ -541,6 +538,7 @@ with tab2:
                 else:
                     st.error("Pogrešna lozinka!")
     else:
+        # Promena lozinke
         with st.expander("🔑 Promeni lozinku"):
             st.write("Promena lozinke (samo za admina)")
             old = st.text_input("Stara lozinka", type="password", key="old_pass")
@@ -556,17 +554,20 @@ with tab2:
                 else:
                     st.error("Stara lozinka nije tačna")
 
+        # Ručno zakazivanje
         admin_rucno_zakazi(datetime.now().date())
         
         st.write("---")
         st.write("## 📊 Finansijski pregled")
         
+        # Prva dva reda - broj zakazanih
         col1, col2 = st.columns(2)
         with col1:
             st.metric("📅 Zakazano danas", get_today_bookings_count())
         with col2:
             st.metric("📆 Zakazano u narednih 7 dana", get_next_7_days_bookings_count())
         
+        # Drugi red - mesečni i godišnji pazar (sa raščlanjenjem)
         col3, col4 = st.columns(2)
         with col3:
             st.write("**💰 Mesečni pazar**")
@@ -581,7 +582,7 @@ with tab2:
             st.write(f"Kartica: {ka:,.0f} din")
             st.write(f"**Ukupno: {uk:,.0f} din**")
         
-        # --- Dnevni pazar (odvojeno keš, kartica, ukupno) ---
+        # Dnevni pazar (box)
         st.markdown("---")
         ukupno, kes, kartica = get_today_earnings_breakdown()
         st.markdown(f"""
@@ -598,6 +599,7 @@ with tab2:
         st.write("---")
         st.write("## 📋 Termini za danas")
         
+        # Učitavanje svih termina za danas
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
         c.execute("""
@@ -611,12 +613,43 @@ with tab2:
         conn.close()
         
         if rows:
-            for idx, row in enumerate(rows):
-                id, vreme, ime, telefon, usluga, cena, status, payment_method = row
+            # Grupisanje po (ime, telefon, usluga, cena) - jer isti klijent može imati više slotova
+            grupe = {}
+            for id, vreme, ime, telefon, usluga, cena, status, payment_method in rows:
+                key = (ime, telefon, usluga, cena)
+                if key not in grupe:
+                    grupe[key] = {
+                        'vremena': [],
+                        'ids': [],
+                        'status': status,
+                        'payment_method': payment_method
+                    }
+                grupe[key]['vremena'].append(vreme)
+                grupe[key]['ids'].append(id)
+                # Ako je neki od slotova naplaćen, a neki nije (ne bi trebalo), uzimamo prvi status
+                # ali za svaki slučaj, ako je bilo koji naplaćen, postavljamo na naplaćen (mada će svi biti isti)
+                if status == 'naplacen':
+                    grupe[key]['status'] = 'naplacen'
+                    grupe[key]['payment_method'] = payment_method
+                # Ako je neki otkazan, ali to se ne bi trebalo desiti jer su otkazani svi slotovi zajedno
+            
+            # Prikazivanje grupisanih redova
+            for (ime, telefon, usluga, cena), data in grupe.items():
+                vremena = sorted(data['vremena'])
+                ids = data['ids']
+                status = data['status']
+                payment_method = data['payment_method']
+                
+                # Opseg vremena
+                if len(vremena) == 1:
+                    vreme_prikaz = vremena[0]
+                else:
+                    vreme_prikaz = f"{vremena[0]} – {vremena[-1]}"
+                
                 with st.container():
                     cols = st.columns([1.2, 1.5, 1.2, 2, 1.2, 1.5])
                     with cols[0]:
-                        st.write(vreme)
+                        st.write(vreme_prikaz)
                     with cols[1]:
                         st.write(ime)
                     with cols[2]:
@@ -625,32 +658,37 @@ with tab2:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
                         if status == 'zakazan':
-                            if st.button("❌ Otkaži", key=f"otkazi_{id}"):
-                                otkazi_termin(id)
+                            # Dugme za otkazivanje cele grupe
+                            if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
+                                for id in ids:
+                                    otkazi_termin(id)
                                 st.rerun()
-                            if st.button("💰 Naplati", key=f"naplati_{id}"):
-                                st.session_state['naplata_id'] = id
+                            # Dugme za naplatu cele grupe
+                            if st.button("💰 Naplati", key=f"naplati_grupa_{ids[0]}"):
+                                st.session_state['naplata_id'] = ids  # čuvamo listu ID-jeva
                                 st.rerun()
                         elif status == 'naplacen':
                             st.success(f"✅ Naplaćeno ({payment_method})")
                         elif status == 'otkazan':
                             st.warning("❌ Otkazano")
                     with cols[5]:
-                        if status == 'zakazan' and st.session_state.get('naplata_id') == id:
+                        # Ako je trenutno otvoren dijalog za naplatu za ovu grupu
+                        if status == 'zakazan' and st.session_state.get('naplata_id') == ids:
                             payment_choice = st.radio(
                                 "Način plaćanja",
                                 ["Keš", "Kartica"],
-                                key=f"payment_{id}",
+                                key=f"payment_grupa_{ids[0]}",
                                 label_visibility="collapsed"
                             )
                             col_a, col_b = st.columns(2)
                             with col_a:
-                                if st.button("✅ Potvrdi", key=f"potvrdi_{id}"):
-                                    naplati_termin(id, payment_choice)
+                                if st.button("✅ Potvrdi", key=f"potvrdi_grupa_{ids[0]}"):
+                                    for id in ids:
+                                        naplati_termin(id, payment_choice)
                                     st.session_state['naplata_id'] = None
                                     st.rerun()
                             with col_b:
-                                if st.button("❌ Odustani", key=f"odustani_{id}"):
+                                if st.button("❌ Odustani", key=f"odustani_grupa_{ids[0]}"):
                                     st.session_state['naplata_id'] = None
                                     st.rerun()
                     st.markdown("---")
