@@ -44,6 +44,37 @@ def init_db():
 
 
 init_db()
+def generisi_slotove_za_dan(datum):
+    conn = sqlite3.connect('termini.db')
+    c = conn.cursor()
+
+    pocetak = datetime.strptime(f"{datum} 09:00", "%Y-%m-%d %H:%M")
+    kraj = datetime.strptime(f"{datum} 20:00", "%Y-%m-%d %H:%M")
+
+    trenutno = pocetak
+
+    while trenutno < kraj:
+        vreme = trenutno.strftime("%H:%M")
+
+        c.execute(
+            "SELECT * FROM rezervacije WHERE datum=? AND vreme=?",
+            (datum, vreme)
+        )
+
+        postoji = c.fetchone()
+
+        if not postoji:
+            c.execute(
+                """INSERT INTO rezervacije 
+                (usluga, datum, vreme, ime, telefon, cena)
+                VALUES (?, ?, ?, ?, ?, ?)""",
+                (None, datum, vreme, None, None, None)
+            )
+
+        trenutno += timedelta(minutes=15)
+
+    conn.commit()
+    conn.close()
 
 # --- PRIKAZ LOGOA (Zameni "logo.png" sa tačnim imenom tvoje slike) ---
 st.image("IMG-c75b1bbded411581450ad9e3374dbc68-V.jpg", width=300)
