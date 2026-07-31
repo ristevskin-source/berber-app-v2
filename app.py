@@ -65,7 +65,7 @@ def generisi_slotove_za_dan(datum):
 
     trenutno = pocetak
 
-        while trenutno < kraj:
+    while trenutno < kraj:
 
         # Pauza 12:00 - 13:00
         if trenutno >= datetime.strptime(f"{datum} 12:00", "%Y-%m-%d %H:%M") and \
@@ -84,7 +84,7 @@ def generisi_slotove_za_dan(datum):
 
         if not postoji:
             c.execute(
-                """INSERT INTO rezervacije 
+                """INSERT INTO rezervacije
                 (usluga, datum, vreme, ime, telefon, cena, status)
                 VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (None, datum, vreme, None, None, None, 'zakazan')
