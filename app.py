@@ -461,8 +461,6 @@ conn.commit()
 conn.close()
 
 # Inicijalizacija session_state
-if 'izabrana_usluga' not in st.session_state:    
-# Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
     st.session_state['izabrana_usluga'] = None
 if 'izabrani_termin' not in st.session_state:
