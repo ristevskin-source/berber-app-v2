@@ -668,6 +668,8 @@ with tab2:
                     }
                 grupe[key]['vremena'].append(vreme)
                 grupe[key]['ids'].append(id)
+                if grupe[key]['cena'] == 0 and cena > 0:
+                    grupe[key]['cena'] = cena
                 if status == 'naplacen':
                     grupe[key]['status'] = 'naplacen'
                     grupe[key]['payment_method'] = payment_method
