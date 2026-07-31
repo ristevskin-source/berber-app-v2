@@ -169,7 +169,7 @@ def get_unique_clients_count_for_date(datum):
     c.execute("""
         SELECT COUNT(DISTINCT ime || '|' || telefon || '|' || usluga || '|' || cena)
         FROM rezervacije
-        WHERE datum=? AND ime IS NOT NULL
+        WHERE datum=? AND ime IS NOT NULL AND status='zakazan'
     """, (datum,))
     count = c.fetchone()[0]
     conn.close()
