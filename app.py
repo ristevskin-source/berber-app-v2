@@ -652,18 +652,7 @@ with tab2:
         """, (admin_datum,))
         rows = c.fetchall()
         conn.close()
-        st.write("TEST BAZE")
-
-        conn = sqlite3.connect('termini.db')
-        c = conn.cursor()
-
-        c.execute("SELECT vreme, ime, usluga, cena, status FROM rezervacije WHERE ime IS NOT NULL ORDER BY vreme")
-
-        for red in c.fetchall():
-            st.write(red)
-
-        conn.close()
-        
+       
         if rows:
             # Grupisanje po (ime, telefon, usluga, cena)
             grupe = {}
