@@ -66,22 +66,19 @@ def generisi_slotove_za_dan(datum):
     trenutno = pocetak
 
     while trenutno < kraj:
-        vreme = trenutno.strftime("%H:%M")
 
-        c.execute(
-            "SELECT * FROM rezervacije WHERE datum=? AND vreme=?",
-            (datum, vreme)
-        )
+    # Pauza 12:00 - 13:00
+    if trenutno >= datetime.strptime(f"{datum} 12:00", "%Y-%m-%d %H:%M") and \
+       trenutno < datetime.strptime(f"{datum} 13:00", "%Y-%m-%d %H:%M"):
+        trenutno += timedelta(minutes=15)
+        continue
 
-        postoji = c.fetchone()
+    vreme = trenutno.strftime("%H:%M")
 
-        if not postoji:
-            c.execute(
-                """INSERT INTO rezervacije 
-                (usluga, datum, vreme, ime, telefon, cena, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (None, datum, vreme, None, None, None, 'zakazan')
-            )
+    c.execute(
+        "SELECT * FROM rezervacije WHERE datum=? AND vreme=?",
+        (datum, vreme)
+    )
 
         trenutno += timedelta(minutes=15)
 
