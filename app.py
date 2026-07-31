@@ -654,7 +654,7 @@ with tab2:
         conn.close()
        
         if rows:
-            # Grupisanje po (ime, telefon, usluga, cena)
+            # Grupisanje po (ime, telefon, usluga)
             grupe = {}
             for id, vreme, ime, telefon, usluga, cena, status, payment_method in rows:
                 key = (ime, telefon, usluga)
@@ -663,7 +663,8 @@ with tab2:
                         'vremena': [],
                         'ids': [],
                         'status': status,
-                        'payment_method': payment_method
+                        'payment_method': payment_method,
+                        'cena': cena,
                     }
                 grupe[key]['vremena'].append(vreme)
                 grupe[key]['ids'].append(id)
@@ -676,6 +677,7 @@ with tab2:
                 ids = data['ids']
                 status = data['status']
                 payment_method = data['payment_method']
+                cena = data['cena']
                 
                 if len(vremena) == 1:
                     vreme_prikaz = vremena[0]
