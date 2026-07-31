@@ -183,7 +183,7 @@ def get_unique_clients_count_next_7_days():
     c.execute("""
         SELECT COUNT(DISTINCT ime || '|' || telefon || '|' || usluga || '|' || cena)
         FROM rezervacije
-        WHERE datum BETWEEN ? AND ? AND ime IS NOT NULL
+        WHERE datum BETWEEN ? AND ? AND ime IS NOT NULL AND status='zakazan'
     """, (today, end_date))
     count = c.fetchone()[0]
     conn.close()
