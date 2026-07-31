@@ -122,15 +122,33 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
         return None
 
     broj_slotova = trajanje // 15
+
     if start_index + broj_slotova > len(svi_slotovi):
         return None
 
     potrebni_slotovi = []
+
+    prethodno_vreme = None
+
     for i in range(broj_slotova):
         slot_vreme, ime = svi_slotovi[start_index + i]
+
+        # slot mora biti slobodan
         if ime is not None:
             return None
+
+        # proverava da nema prekida (pauza)
+        if prethodno_vreme:
+            t1 = datetime.strptime(prethodno_vreme, "%H:%M")
+            t2 = datetime.strptime(slot_vreme, "%H:%M")
+
+            razlika = (t2 - t1).seconds // 60
+
+            if razlika != 15:
+                return None
+
         potrebni_slotovi.append(slot_vreme)
+        prethodno_vreme = slot_vreme
 
     return potrebni_slotovi
 
