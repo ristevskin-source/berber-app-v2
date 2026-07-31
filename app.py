@@ -630,9 +630,9 @@ with tab2:
         <div style="background-color: #1e1e1e; padding: 20px; border-radius: 10px; border: 2px solid #d4af37; text-align: center;">
             <h3 style="color: #d4af37;">💵 Pazar za {formatiraj_datum(admin_datum)} (do sada)</h3>
             <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 10px;">
-                <div><span style="color: #aaa;">Keš:</span> <strong>{kes:,.0f} din</strong></div>
-                <div><span style="color: #aaa;">Kartica:</span> <strong>{kartica:,.0f} din</strong></div>
-                <div><span style="color: #d4af37;">Ukupno:</span> <strong style="font-size: 1.4em;">{ukupno:,.0f} din</strong></div>
+                <div><span style="color: #aaa;">Keš:</span> <strong style="color:#ffffff !important;">{kes:,.0f} din</strong></div>
+                <div><span style="color: #aaa;">Kartica:</span> <strong style="color:#ffffff !important;">{kartica:,.0f} din</strong></div>
+                <div><span style="color: #d4af37;">Ukupno:</span> <strong style="color:#d4af37 !important; font-size:1.4em;">{ukupno:,.0f} din</strong></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
