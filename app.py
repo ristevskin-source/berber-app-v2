@@ -293,6 +293,33 @@ def get_yearly_earnings_breakdown():
             kartica = total if total else 0
     ukupno = kes + kartica
     return ukupno, kes, kartica
+        ukupno = kes + kartica
+    return ukupno, kes, kartica
+
+
+def moze_naplata(datum, vremena):
+    sada = datetime.now()
+
+    if isinstance(datum, str):
+        termin_datum = datetime.strptime(datum, "%Y-%m-%d").date()
+    else:
+        termin_datum = datum
+
+    if termin_datum > sada.date():
+        return False
+
+    if termin_datum == sada.date():
+        poslednje_vreme = max(vremena)
+
+        termin_vreme = datetime.strptime(
+            poslednje_vreme,
+            "%H:%M"
+        ).time()
+
+        if termin_vreme > sada.time():
+            return False
+
+    return True
 
 # --- ADMIN FUNKCIJE ZA AKCIJE ---
 def otkazi_termin(rezervacija_id):
