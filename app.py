@@ -195,10 +195,18 @@ def get_earnings_breakdown_for_date(datum):
 
     c.execute("""
         SELECT payment_method, SUM(cena)
-        FROM rezervacije
-        WHERE datum=?
-        AND status='naplacen'
-        AND cena > 0
+        FROM (
+            SELECT 
+                ime,
+                telefon,
+                usluga,
+                payment_method,
+                MAX(cena) AS cena
+            FROM rezervacije
+            WHERE datum=?
+            AND status='naplacen'
+            GROUP BY ime, telefon, usluga, payment_method
+        )
         GROUP BY payment_method
     """, (datum,))
 
