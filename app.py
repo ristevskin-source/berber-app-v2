@@ -194,9 +194,9 @@ def get_earnings_breakdown_for_date(datum):
     c = conn.cursor()
 
     c.execute("""
-        SELECT payment_method, SUM(cena) 
-        FROM rezervacije 
-        WHERE datum=? AND status='naplacen'
+        SELECT payment_method, SUM(cena)
+        FROM rezervacije
+        WHERE datum=?
         AND status='naplacen'
         AND cena > 0
         GROUP BY payment_method
@@ -216,7 +216,6 @@ def get_earnings_breakdown_for_date(datum):
 
     ukupno = kes + kartica
     return ukupno, kes, kartica
-
 def get_monthly_earnings_breakdown():
     today = datetime.now().date()
     first_day = today.replace(day=1)
