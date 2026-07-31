@@ -652,6 +652,20 @@ with tab2:
         """, (admin_datum,))
         rows = c.fetchall()
         conn.close()
+        conn = sqlite3.connect('termini.db')
+        c = conn.cursor()
+
+        c.execute("""
+            SELECT datum, vreme, ime, usluga, cena, status, payment_method
+            FROM rezervacije
+            WHERE status='naplacen'
+            ORDER BY datum, vreme
+        """)
+
+        for red in c.fetchall():
+            st.write("NAPLAĆENO:", red)
+
+        conn.close()
        
         if rows:
             # Grupisanje po (ime, telefon, usluga)
