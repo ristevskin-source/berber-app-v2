@@ -776,32 +776,54 @@ with tab2:
                                 for id in ids:
                                     otkazi_termin(id)
                                 st.rerun()
+
                             if st.button("💰 Naplati", key=f"naplati_grupa_{ids[0]}"):
                                 st.session_state['naplata_id'] = ids
                                 st.rerun()
+
                         elif status == 'naplacen':
                             st.success(f"✅ Naplaćeno ({payment_method})")
+
                         elif status == 'otkazan':
                             st.warning("❌ Otkazano")
+
+
                     with cols[5]:
                         if status == 'zakazan' and st.session_state.get('naplata_id') == ids:
+
                             payment_choice = st.radio(
                                 "Način plaćanja",
                                 ["Keš", "Kartica"],
                                 key=f"payment_grupa_{ids[0]}",
                                 label_visibility="collapsed"
                             )
+
                             col_a, col_b = st.columns(2)
+
                             with col_a:
                                 if st.button("✅ Potvrdi", key=f"potvrdi_grupa_{ids[0]}"):
-                                    for id in ids:
-                                        naplati_termin(id, payment_choice)
-                                    st.session_state['naplata_id'] = None
-                                    st.rerun()
+
+                                    if moze_naplata(admin_datum, vremena):
+
+                                        for id in ids:
+                                            naplati_termin(id, payment_choice)
+
+                                        st.session_state['naplata_id'] = None
+                                        st.rerun()
+
+                                    else:
+                                        st.warning(
+                                            "⏳ Termin još nije završen. "
+                                            "Naplata nije moguća pre završetka usluge."
+                                        )
+
+
                             with col_b:
                                 if st.button("❌ Odustani", key=f"odustani_grupa_{ids[0]}"):
                                     st.session_state['naplata_id'] = None
                                     st.rerun()
+
+
                     st.markdown("---")
         else:
             st.info(f"Nema zakazanih klijenata za {formatiraj_datum(admin_datum)}.")
