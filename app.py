@@ -138,15 +138,26 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
     try:
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
+
+        prvi = True
+
         for slot_vreme in slotovi:
+            if prvi:
+                cena = usluga_cena
+                prvi = False
+            else:
+                cena = 0
+
             c.execute("""
                 UPDATE rezervacije 
                 SET ime=?, telefon=?, usluga=?, cena=?, status='zakazan'
                 WHERE datum=? AND vreme=?
-            """, (ime, telefon, usluga_ime, usluga_cena, datum, slot_vreme))
+            """, (ime, telefon, usluga_ime, cena, datum, slot_vreme))
+
         conn.commit()
         conn.close()
         return True
+
     except Exception as e:
         st.error(e)
         return False
