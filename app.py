@@ -442,24 +442,6 @@ def admin_rucno_zakazi():
 
 init_db()
 
-st.write("ČIŠĆENJE JE POKRENUTO")
-# PRIVREMENO ČIŠĆENJE TEST PODATAKA
-conn = sqlite3.connect('termini.db')
-c = conn.cursor()
-
-c.execute("""
-    UPDATE rezervacije
-    SET ime=NULL,
-        telefon=NULL,
-        usluga=NULL,
-        cena=NULL,
-        status=NULL,
-        payment_method=NULL
-""")
-
-conn.commit()
-conn.close()
-
 # Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
     st.session_state['izabrana_usluga'] = None
