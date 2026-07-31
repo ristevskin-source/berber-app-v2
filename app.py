@@ -657,7 +657,7 @@ with tab2:
             # Grupisanje po (ime, telefon, usluga, cena)
             grupe = {}
             for id, vreme, ime, telefon, usluga, cena, status, payment_method in rows:
-                key = (ime, telefon, usluga, cena)
+                key = (ime, telefon, usluga)
                 if key not in grupe:
                     grupe[key] = {
                         'vremena': [],
@@ -671,7 +671,7 @@ with tab2:
                     grupe[key]['status'] = 'naplacen'
                     grupe[key]['payment_method'] = payment_method
             
-            for (ime, telefon, usluga, cena), data in grupe.items():
+            for (ime, telefon, usluga), data in grupe.items():
                 vremena = sorted(data['vremena'])
                 ids = data['ids']
                 status = data['status']
