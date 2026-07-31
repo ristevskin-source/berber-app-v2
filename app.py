@@ -180,7 +180,7 @@ def get_unique_clients_count_next_7_days():
     end_date = today + timedelta(days=6)
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
-    c.execute("""
+    c.execute("""SELECT
         SELECT COUNT(DISTINCT ime || '|' || telefon || '|' || usluga || '|' || cena)
         FROM rezervacije
         WHERE datum BETWEEN ? AND ? AND ime IS NOT NULL AND status='zakazan'
