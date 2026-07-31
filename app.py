@@ -192,21 +192,28 @@ def get_unique_clients_count_next_7_days():
 def get_earnings_breakdown_for_date(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
+
     c.execute("""
         SELECT payment_method, SUM(cena) 
         FROM rezervacije 
         WHERE datum=? AND status='naplacen'
+        AND status='naplacen'
+        AND cena > 0
         GROUP BY payment_method
     """, (datum,))
+
     results = c.fetchall()
     conn.close()
+
     kes = 0
     kartica = 0
+
     for method, total in results:
         if method == 'Keš':
             kes = total if total else 0
         elif method == 'Kartica':
             kartica = total if total else 0
+
     ukupno = kes + kartica
     return ukupno, kes, kartica
 
