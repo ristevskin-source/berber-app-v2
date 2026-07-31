@@ -167,7 +167,7 @@ def get_unique_clients_count_for_date(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
     c.execute("""
-        SELECT COUNT(DISTINCT ime || '|' || telefon || '|' || usluga || '|' || cena)
+        COUNT(DISTINCT ime || '|' || telefon || '|' || usluga)
         FROM rezervacije
         WHERE datum=? AND ime IS NOT NULL AND status='zakazan'
     """, (datum,))
