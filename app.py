@@ -501,18 +501,6 @@ def admin_rucno_zakazi():
 
 init_db()
 
-# PRIVREMENO BRISANJE TESTNOG TERMINA
-conn = sqlite3.connect('termini.db')
-c = conn.cursor()
-
-c.execute("""
-DELETE FROM rezervacije
-WHERE datum = ? AND ime = ?
-""", ("2026-08-01", "IME TEST KLIJENTA"))
-
-conn.commit()
-conn.close()
-
 # Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
     st.session_state['izabrana_usluga'] = None
