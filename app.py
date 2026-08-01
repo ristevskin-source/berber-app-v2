@@ -265,7 +265,95 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
 # --- ADMIN RADNI PANEL ---
 
 def prikazi_admin_raspored():
+
     st.write("## 📅 Nedeljni raspored termina")
+
+    datumi = generisi_datume()
+
+    # priprema zaglavlja
+    kolone = ["Vreme"]
+
+    for d in datumi:
+        kolone.append(formatiraj_datum(d))
+
+    # horizontalni prostor za mobilni prikaz
+    with st.container():
+
+        cols = st.columns(len(kolone))
+
+        for i, naziv in enumerate(kolone):
+            with cols[i]:
+                st.markdown(
+                    f"""
+                    <div style="
+                    background:#2b2b2b;
+                    color:#d4af37;
+                    text-align:center;
+                    padding:8px;
+                    border:1px solid #d4af37;
+                    border-radius:8px;
+                    font-size:12px;">
+                    <b>{naziv}</b>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+
+        # generisanje vremena
+        vremena = []
+
+        pocetak = datetime.strptime("09:00", "%H:%M")
+        kraj = datetime.strptime("20:00", "%H:%M")
+
+        trenutno = pocetak
+
+        while trenutno < kraj:
+
+            vreme = trenutno.strftime("%H:%M")
+
+            vremena.append(vreme)
+
+            trenutno += timedelta(minutes=15)
+
+
+        # redovi
+
+        for vreme in vremena:
+
+            cols = st.columns(len(kolone))
+
+            with cols[0]:
+                st.write(vreme)
+
+            for i in range(1, len(kolone)):
+
+                with cols[i]:
+
+                    if "12:00" <= vreme < "13:00":
+
+                        st.markdown(
+                            """
+                            <div style="
+                            background:#7a3333;
+                            color:#ffcccc;
+                            text-align:center;
+                            padding:6px;
+                            border-radius:5px;
+                            font-size:11px;">
+                            PAUZA
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+
+                    else:
+
+                        st.button(
+                            "🟢",
+                            key=f"test_{i}_{vreme}",
+                            use_container_width=True
+                        )
 
 
 
