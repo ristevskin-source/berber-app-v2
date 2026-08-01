@@ -20,9 +20,9 @@ div[data-testid="stMetric"] {
     border-radius: 15px;
 }
 
-/* Naslovi */
-h1, h2, h3 {
-    color: #d4af37;
+.stMarkdown p {
+    color: white !important;
+    font-weight: 600;
 }
 
 /* Tekst */
