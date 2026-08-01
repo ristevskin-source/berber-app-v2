@@ -49,6 +49,21 @@ h2, h3 {
     color: white !important;
 }
 
+/* Polja za unos - datum i izbori */
+div[data-baseweb="input"] {
+    background-color: #2b2b2b;
+    border: 1px solid #d4af37;
+    border-radius: 10px;
+}
+
+div[data-baseweb="select"] {
+    background-color: #2b2b2b;
+}
+
+input {
+    color: white !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
