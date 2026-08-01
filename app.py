@@ -63,16 +63,6 @@ input {
     color: white !important;
 }
 
-/* Boja oznake DATUM */
-[data-testid="stDateInput"] label {
-    color: white !important;
-}
-
-/* Tekst izabranog datuma */
-[data-testid="stDateInput"] div {
-    color: white !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
