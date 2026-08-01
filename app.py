@@ -61,6 +61,7 @@ div[data-baseweb="select"] {
 
 input {
     color: white !important;
+    background-color: #2b2b2b !important;
 }
 
 /* Datum - naziv i izabrani datum */
