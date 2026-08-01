@@ -3,7 +3,6 @@ import sqlite3
 from datetime import datetime, timedelta
 
 # --- PODEŠAVANJE STRANICE ---
-st.set_page_config(page_title="Kod Kubanca", page_icon="✂️")
 # --- STILIZACIJA IZGLEDA ---
 st.markdown("""
 <style>
@@ -61,6 +60,16 @@ div[data-baseweb="select"] {
 }
 
 input {
+    color: white !important;
+}
+
+/* Boja oznake DATUM */
+[data-testid="stDateInput"] label {
+    color: white !important;
+}
+
+/* Tekst izabranog datuma */
+[data-testid="stDateInput"] div {
     color: white !important;
 }
 
