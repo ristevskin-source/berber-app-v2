@@ -68,6 +68,15 @@ input {
     color: white !important;
 }
 
+/* Brojevi u finansijskim karticama */
+div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: white !important;
+}
+
+div[data-testid="stMetric"] [data-testid="stMetricLabel"] {
+    color: white !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
