@@ -262,6 +262,14 @@ def rezervisi_slotove(datum, slotovi, ime, telefon, usluga_ime, usluga_cena, usl
         st.error(e)
         return False
 
+# --- ADMIN RADNI PANEL ---
+
+def prikazi_admin_raspored():
+    st.write("## 📅 Nedeljni raspored termina")
+
+
+
+
 # --- ADMIN FUNKCIJE ZA METRIKE ---
 def get_unique_clients_count_for_date(datum):
     conn = sqlite3.connect('termini.db')
@@ -751,8 +759,8 @@ with tab2:
                 else:
                     st.error("Stara lozinka nije tačna")
 
-        # Ručno zakazivanje
-        admin_rucno_zakazi()
+        # ADMIN RADNI PANEL
+        prikazi_admin_raspored()
         
         st.write("---")
         
