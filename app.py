@@ -44,6 +44,11 @@ h1, h2, h3 {
     color: black;
 }
 
+/* Naslovi termina */
+h2, h3 {
+    color: white !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
