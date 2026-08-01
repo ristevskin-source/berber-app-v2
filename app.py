@@ -4,6 +4,48 @@ from datetime import datetime, timedelta
 
 # --- PODEŠAVANJE STRANICE ---
 st.set_page_config(page_title="Kod Kubanca", page_icon="✂️")
+# --- STILIZACIJA IZGLEDA ---
+st.markdown("""
+<style>
+
+.stApp {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+/* Kartice sa informacijama */
+div[data-testid="stMetric"] {
+    background-color: #2b2b2b;
+    border: 2px solid #d4af37;
+    padding: 15px;
+    border-radius: 15px;
+}
+
+/* Naslovi */
+h1, h2, h3 {
+    color: #d4af37;
+}
+
+/* Tekst */
+.stMarkdown {
+    color: white;
+}
+
+/* Dugmad */
+.stButton > button {
+    background-color: #2b2b2b;
+    color: #d4af37;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+}
+
+.stButton > button:hover {
+    background-color: #d4af37;
+    color: black;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 # --- INICIJALIZACIJA BAZE ---
 def init_db():
