@@ -251,26 +251,42 @@ def get_earnings_breakdown_for_date(datum):
 def get_monthly_earnings_breakdown():
     today = datetime.now().date()
     first_day = today.replace(day=1)
+
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
+
     c.execute("""
-        SELECT payment_method, SUM(cena) 
-        FROM rezervacije 
-        WHERE datum BETWEEN ? AND ? AND status='naplacen'
+        SELECT payment_method, SUM(cena)
+        FROM (
+            SELECT 
+                ime,
+                telefon,
+                usluga,
+                payment_method,
+                MAX(cena) AS cena
+            FROM rezervacije
+            WHERE datum BETWEEN ? AND ?
+            AND status='naplacen'
+            GROUP BY ime, telefon, usluga, payment_method
+        )
         GROUP BY payment_method
     """, (first_day, today))
+
     results = c.fetchall()
     conn.close()
+
     kes = 0
     kartica = 0
+
     for method, total in results:
         if method == 'Keš':
             kes = total if total else 0
         elif method == 'Kartica':
             kartica = total if total else 0
-    ukupno = kes + kartica
-    return ukupno, kes, kartica
 
+    ukupno = kes + kartica
+
+    return ukupno, kes, kartica
 def get_yearly_earnings_breakdown():
     today = datetime.now().date()
     first_day = today.replace(month=1, day=1)
@@ -280,9 +296,18 @@ def get_yearly_earnings_breakdown():
 
     c.execute("""
         SELECT payment_method, SUM(cena)
-        FROM rezervacije
-        WHERE datum BETWEEN ? AND ?
-        AND status='naplacen'
+        FROM (
+            SELECT 
+                ime,
+                telefon,
+                usluga,
+                payment_method,
+                MAX(cena) AS cena
+            FROM rezervacije
+            WHERE datum BETWEEN ? AND ?
+            AND status='naplacen'
+            GROUP BY ime, telefon, usluga, payment_method
+        )
         GROUP BY payment_method
     """, (first_day, today))
 
@@ -301,7 +326,6 @@ def get_yearly_earnings_breakdown():
     ukupno = kes + kartica
 
     return ukupno, kes, kartica
-
 
 def moze_naplata(datum, vremena):
     sada = datetime.now()
