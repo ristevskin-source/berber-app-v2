@@ -43,7 +43,7 @@ h1, h2, h3 {
     color: black;
 }
 
-/* Naslovi termina */
+/* Naslov termina */
 h2, h3 {
     color: white !important;
 }
@@ -60,6 +60,11 @@ div[data-baseweb="select"] {
 }
 
 input {
+    color: white !important;
+}
+
+/* Datum - naziv i izabrani datum */
+[data-testid="stDateInput"] * {
     color: white !important;
 }
 
