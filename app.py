@@ -270,82 +270,27 @@ def prikazi_admin_raspored():
 
     datumi = generisi_datume()
 
-    st.markdown("""
-    <style>
+    # zaglavlje - dani
+    zaglavlje = st.columns(7)
 
-    .kalendar-wrapper {
-        overflow-x:auto;
-        width:100%;
-    }
+    for i, d in enumerate(datumi):
+        with zaglavlje[i]:
+            st.markdown(
+                f"""
+                <div style="
+                background:#2b2b2b;
+                color:#d4af37;
+                text-align:center;
+                padding:6px;
+                border:1px solid #d4af37;
+                border-radius:6px;
+                font-size:12px;">
+                <b>{d.strftime('%a')}<br>{d.strftime('%d.%m')}</b>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-    .kalendar {
-        display:grid;
-        grid-template-columns:repeat(7, 60px);
-        gap:2px;
-        min-width:420px;
-    }
-
-    .dan {
-        background:#2b2b2b;
-        color:#d4af37;
-        text-align:center;
-        padding:5px;
-        font-size:12px;
-        border:1px solid #d4af37;
-        border-radius:5px;
-    }
-
-    .slot {
-        height:30px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        border-radius:5px;
-        font-size:11px;
-        font-weight:bold;
-    }
-
-    .slobodan {
-        background:#1f8a3b;
-        color:black;
-    }
-
-    .zauzet {
-        background:#b52b2b;
-        color:white;
-    }
-
-    .pauza {
-        grid-column: span 7;
-        height:18px;
-        background:#8b3a3a;
-        color:#ffdede;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:11px;
-        border-radius:4px;
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
-
-
-    html = '<div class="kalendar-wrapper"><div class="kalendar">'
-
-
-    # dani
-
-    for d in datumi:
-        html += f"""
-        <div class="dan">
-            {d.strftime("%a")}<br>
-            {d.strftime("%d.%m")}
-        </div>
-        """
-
-
-    # termini
 
     trenutno = datetime.strptime("09:00", "%H:%M")
     kraj = datetime.strptime("20:00", "%H:%M")
@@ -356,35 +301,52 @@ def prikazi_admin_raspored():
         vreme = trenutno.strftime("%H:%M")
 
 
-        # pauza samo jedan red
-
+        # pauza kao jedan informativni red
         if vreme == "12:00":
-            html += """
-            <div class="pauza">
+            st.markdown(
+                """
+                <div style="
+                background:#7a3030;
+                color:#ffdede;
+                text-align:center;
+                height:18px;
+                border-radius:4px;
+                font-size:11px;">
                 PAUZA 12:00 - 13:00
-            </div>
-            """
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
             trenutno = datetime.strptime("13:00", "%H:%M")
             continue
 
 
-        for d in datumi:
+        red = st.columns(7)
 
-            html += f"""
-            <div class="slot slobodan">
-                {vreme}
-            </div>
-            """
+        for i, d in enumerate(datumi):
+
+            with red[i]:
+
+                st.markdown(
+                    f"""
+                    <div style="
+                    background:#1f8a3b;
+                    color:black;
+                    height:28px;
+                    border-radius:5px;
+                    text-align:center;
+                    font-size:11px;
+                    font-weight:bold;
+                    padding-top:5px;">
+                    {vreme}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
 
         trenutno += timedelta(minutes=15)
-
-
-    html += "</div></div>"
-
-
-    st.markdown(html, unsafe_allow_html=True)
-
 
 # --- ADMIN FUNKCIJE ZA METRIKE ---
 def get_unique_clients_count_for_date(datum):
