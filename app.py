@@ -270,96 +270,153 @@ def prikazi_admin_raspored():
 
     datumi = generisi_datume()
 
-    # zaglavlje
-    cols = st.columns([0.55,1,1,1,1,1,1,1])
+    # horizontalni kontejner za tabelu
+    st.markdown("""
+    <style>
+    .calendar-wrapper {
+        overflow-x: auto;
+        width: 100%;
+    }
 
-    with cols[0]:
-        st.markdown("**Vreme**")
+    .calendar-table {
+        min-width: 850px;
+        border-collapse: collapse;
+    }
 
-    for i, d in enumerate(datumi):
-        with cols[i+1]:
-            st.markdown(
-                f"""
-                <div style="
-                text-align:center;
-                color:#d4af37;
-                font-size:12px;">
-                <b>{d.strftime('%a')}<br>{d.strftime('%d.%m')}</b>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    .calendar-table td,
+    .calendar-table th {
+        border: 1px solid #555;
+        text-align: center;
+        padding: 4px;
+        height: 42px;
+    }
+
+    .calendar-head {
+        background-color: #2b2b2b;
+        color: #d4af37;
+        font-weight: bold;
+    }
+
+    .time-cell {
+        background-color: #2b2b2b;
+        color: white;
+        font-weight: bold;
+        width: 70px;
+    }
+
+    .pause-row {
+        background-color: #8b0000;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
 
 
-    trenutno = datetime.strptime("09:00","%H:%M")
-    kraj = datetime.strptime("20:00","%H:%M")
+    # zaglavlje dana
+    zaglavlje = "<table class='calendar-table'>"
+    zaglavlje += "<tr>"
+    zaglavlje += "<th class='calendar-head'>Vreme</th>"
 
+    for datum in datumi:
+        zaglavlje += f"""
+        <th class='calendar-head'>
+        {datum.strftime("%a")}<br>
+        {formatiraj_datum(datum)}
+        </th>
+        """
+
+    zaglavlje += "</tr>"
+
+
+    # pravljenje redova
+    vremena = []
+
+    pocetak = datetime.strptime("09:00", "%H:%M")
+    kraj = datetime.strptime("20:00", "%H:%M")
+
+    trenutno = pocetak
 
     while trenutno < kraj:
 
         vreme = trenutno.strftime("%H:%M")
 
-
         if vreme == "12:00":
 
-            st.markdown(
-                """
-                <div style="
-                background:#8b3a3a;
-                color:white;
-                height:18px;
-                text-align:center;
-                font-size:11px;
-                border-radius:4px;">
-                PAUZA 12:00 - 13:00
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            zaglavlje += """
+            <tr>
+            <td colspan="8" class="pause-row">
+            PAUZA 12:00 - 13:00
+            </td>
+            </tr>
+            """
 
-            trenutno=datetime.strptime("13:00","%H:%M")
-            continue
-
-
-        red = st.columns([0.55,1,1,1,1,1,1,1])
-
-
-        with red[0]:
-            st.markdown(
-                f"""
-                <div style="
-                text-align:center;
-                font-size:11px;
-                padding-top:7px;">
-                {vreme}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-
-        for i in range(7):
-
-            with red[i+1]:
-
-                st.markdown(
-                    f"""
-                    <div style="
-                    background:#1f8a3b;
-                    color:black;
-                    height:28px;
-                    border-radius:5px;
-                    text-align:center;
-                    font-size:11px;
-                    padding-top:6px;">
-                    {vreme}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
+        if not ("12:00" <= vreme < "13:00"):
+            vremena.append(vreme)
 
         trenutno += timedelta(minutes=15)
+
+
+
+    # redovi termina
+    for vreme in vremena:
+
+        zaglavlje += "<tr>"
+
+        zaglavlje += f"""
+        <td class='time-cell'>
+        {vreme}
+        </td>
+        """
+
+        for datum in datumi:
+
+            conn = sqlite3.connect('termini.db')
+            c = conn.cursor()
+
+            c.execute("""
+                SELECT ime
+                FROM rezervacije
+                WHERE datum=? AND vreme=?
+            """,
+            (datum, vreme))
+
+            rezultat = c.fetchone()
+
+            conn.close()
+
+
+            if rezultat and rezultat[0]:
+
+                dugme = "🔴"
+
+            else:
+
+                dugme = "🟢"
+
+
+            zaglavlje += f"""
+            <td>
+            {dugme}
+            </td>
+            """
+
+        zaglavlje += "</tr>"
+
+
+    zaglavlje += "</table>"
+
+
+    st.markdown(
+        f"""
+        <div class="calendar-wrapper">
+        {zaglavlje}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # --- ADMIN FUNKCIJE ZA METRIKE ---
 def get_unique_clients_count_for_date(datum):
