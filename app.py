@@ -699,7 +699,7 @@ def prikaz_nedeljnog_kalendara():
             st.write(vreme)
 
         # pauza
-        if "12:00" <= vreme < "13:00":
+        if "13:00" <= vreme < "14:00":
             for k in range(1,8):
                 with kolone[k]:
                     st.button(
@@ -740,7 +740,7 @@ def prikaz_nedeljnog_kalendara():
                             st.session_state["izabrani_termin"] = vreme
                             st.rerun()
 
-        trenutno += timedelta(minutes=15)
+        trenutno += timedelta(minutes=30)
 
 # ===================================================================
 # GLAVNI DEO APLIKACIJE
