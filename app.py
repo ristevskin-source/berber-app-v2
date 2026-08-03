@@ -502,7 +502,7 @@ def prikazi_slotove(datum):
 
     red = []
     for vreme, ime in svi_slotovi:
-        if "12:00" <= vreme < "13:00":
+        if "13:00" <= vreme < "14:00":
             red.append("PAUZA")
         elif ime is not None:
             red.append(f"🔴 {vreme}")
