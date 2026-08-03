@@ -535,7 +535,32 @@ def prikazi_slotove(datum):
                         ):
                             st.session_state['izabrani_termin'] = termin
                             st.rerun()
+# --- PANEL ZA IZABRANI TERMIN ---
+if 'izabrani_termin' in st.session_state:
 
+    st.divider()
+
+    izabrano = st.session_state['izabrani_termin']
+
+    st.subheader(f"📌 Termin: {izabrano}")
+
+    st.write("Unos podataka za novog klijenta")
+
+    ime = st.text_input("Ime klijenta")
+    telefon = st.text_input("Telefon")
+
+    if st.button("💾 Sačuvaj termin"):
+        if ime and telefon:
+            # ovde ćemo pozvati tvoju postojeću funkciju rezervacije
+
+            st.success("Termin sačuvan")
+
+            del st.session_state['izabrani_termin']
+            st.rerun()
+
+    if st.button("❌ Zatvori"):
+        del st.session_state['izabrani_termin']
+        st.rerun()
 def admin_rucno_zakazi():
     st.write("### ➕ Ručno zakazivanje")
     
