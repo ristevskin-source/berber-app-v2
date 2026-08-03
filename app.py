@@ -270,68 +270,68 @@ def prikazi_admin_raspored():
 
     datumi = generisi_datume()
 
-    # horizontalni kontejner za tabelu
+    # CSS za kalendar
     st.markdown("""
     <style>
-    .calendar-wrapper {
+    .kalendar-wrapper {
         overflow-x: auto;
         width: 100%;
     }
 
-    .calendar-table {
-        min-width: 850px;
-        border-collapse: collapse;
+    .kalendar {
+        display: grid;
+        grid-template-columns: repeat(7, 80px);
+        gap: 2px;
+        min-width: 560px;
     }
 
-    .calendar-table td,
-    .calendar-table th {
-        border: 1px solid #555;
-        text-align: center;
-        padding: 4px;
-        height: 42px;
+    .dan {
+        background:#2b2b2b;
+        color:#d4af37;
+        text-align:center;
+        padding:8px;
+        border:1px solid #d4af37;
+        font-weight:bold;
     }
 
-    .calendar-head {
-        background-color: #2b2b2b;
-        color: #d4af37;
-        font-weight: bold;
+    .slot {
+        height:30px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:white;
+        font-size:11px;
+        border-radius:5px;
     }
 
-    .time-cell {
-        background-color: #2b2b2b;
-        color: white;
-        font-weight: bold;
-        width: 70px;
+    .slobodan {
+        background:#1f7a3a;
     }
 
-    .pause-row {
-        background-color: #8b0000;
-        color: white;
-        text-align: center;
-        font-weight: bold;
+    .zauzet {
+        background:#a83232;
+    }
+
+    .pauza {
+        background:#6b3b3b;
+        color:#ffcccc;
+        font-size:10px;
     }
 
     </style>
     """, unsafe_allow_html=True)
 
 
-    # zaglavlje dana
-    zaglavlje = "<table class='calendar-table'>"
-    zaglavlje += "<tr>"
-    zaglavlje += "<th class='calendar-head'>Vreme</th>"
+    html = '<div class="kalendar-wrapper">'
+    html += '<div class="kalendar">'
 
-    for datum in datumi:
-        zaglavlje += f"""
-        <th class='calendar-head'>
-        {datum.strftime("%a")}<br>
-        {formatiraj_datum(datum)}
-        </th>
-        """
-
-    zaglavlje += "</tr>"
+    # zaglavlje
+    for d in datumi:
+        naziv = d.strftime("%a %d")
+        html += f'<div class="dan">{naziv}</div>'
 
 
-    # pravljenje redova
+    # redovi termina
     vremena = []
 
     pocetak = datetime.strptime("09:00", "%H:%M")
@@ -343,80 +343,37 @@ def prikazi_admin_raspored():
 
         vreme = trenutno.strftime("%H:%M")
 
-        if vreme == "12:00":
-
-            zaglavlje += """
-            <tr>
-            <td colspan="8" class="pause-row">
-            PAUZA 12:00 - 13:00
-            </td>
-            </tr>
-            """
-
-        if not ("12:00" <= vreme < "13:00"):
-            vremena.append(vreme)
+        vremena.append(vreme)
 
         trenutno += timedelta(minutes=15)
 
 
-
-    # redovi termina
     for vreme in vremena:
 
-        zaglavlje += "<tr>"
+        for d in datumi:
 
-        zaglavlje += f"""
-        <td class='time-cell'>
-        {vreme}
-        </td>
-        """
+            if "12:00" <= vreme < "13:00":
 
-        for datum in datumi:
-
-            conn = sqlite3.connect('termini.db')
-            c = conn.cursor()
-
-            c.execute("""
-                SELECT ime
-                FROM rezervacije
-                WHERE datum=? AND vreme=?
-            """,
-            (datum, vreme))
-
-            rezultat = c.fetchone()
-
-            conn.close()
-
-
-            if rezultat and rezultat[0]:
-
-                dugme = "🔴"
+                html += f"""
+                <div class="slot pauza">
+                    PAUZA
+                </div>
+                """
 
             else:
 
-                dugme = "🟢"
+                html += f"""
+                <div class="slot slobodan">
+                    {vreme}
+                </div>
+                """
 
 
-            zaglavlje += f"""
-            <td>
-            {dugme}
-            </td>
-            """
+    html += "</div></div>"
 
-        zaglavlje += "</tr>"
+    st.markdown(html, unsafe_allow_html=True)
 
 
-    zaglavlje += "</table>"
-
-
-    st.markdown(
-        f"""
-        <div class="calendar-wrapper">
-        {zaglavlje}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
 # --- ADMIN FUNKCIJE ZA METRIKE ---
 def get_unique_clients_count_for_date(datum):
