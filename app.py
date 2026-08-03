@@ -270,110 +270,83 @@ def prikazi_admin_raspored():
 
     datumi = generisi_datume()
 
-    # CSS za kalendar
-    st.markdown("""
-    <style>
-    .kalendar-wrapper {
-        overflow-x: auto;
-        width: 100%;
-    }
+    # zaglavlje - dani
+    zaglavlje = st.columns(7)
 
-    .kalendar {
-        display: grid;
-        grid-template-columns: repeat(7, 80px);
-        gap: 2px;
-        min-width: 560px;
-    }
-
-    .dan {
-        background:#2b2b2b;
-        color:#d4af37;
-        text-align:center;
-        padding:8px;
-        border:1px solid #d4af37;
-        font-weight:bold;
-    }
-
-    .slot {
-        height:30px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:white;
-        font-size:11px;
-        border-radius:5px;
-    }
-
-    .slobodan {
-        background:#1f7a3a;
-    }
-
-    .zauzet {
-        background:#a83232;
-    }
-
-    .pauza {
-        background:#6b3b3b;
-        color:#ffcccc;
-        font-size:10px;
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
+    for i, d in enumerate(datumi):
+        with zaglavlje[i]:
+            st.markdown(
+                f"""
+                <div style="
+                background:#2b2b2b;
+                color:#d4af37;
+                text-align:center;
+                padding:6px;
+                border:1px solid #d4af37;
+                border-radius:6px;
+                font-size:12px;">
+                <b>{d.strftime('%a')}<br>{d.strftime('%d.%m')}</b>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 
-    html = '<div class="kalendar-wrapper">'
-    html += '<div class="kalendar">'
-
-    # zaglavlje
-    for d in datumi:
-        naziv = d.strftime("%a %d")
-        html += f'<div class="dan">{naziv}</div>'
-
-
-    # redovi termina
-    vremena = []
-
-    pocetak = datetime.strptime("09:00", "%H:%M")
+    trenutno = datetime.strptime("09:00", "%H:%M")
     kraj = datetime.strptime("20:00", "%H:%M")
 
-    trenutno = pocetak
 
     while trenutno < kraj:
 
         vreme = trenutno.strftime("%H:%M")
 
-        vremena.append(vreme)
+
+        # pauza kao jedan informativni red
+        if vreme == "12:00":
+            st.markdown(
+                """
+                <div style="
+                background:#7a3030;
+                color:#ffdede;
+                text-align:center;
+                height:18px;
+                border-radius:4px;
+                font-size:11px;">
+                PAUZA 12:00 - 13:00
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            trenutno = datetime.strptime("13:00", "%H:%M")
+            continue
+
+
+        red = st.columns(7)
+
+        for i, d in enumerate(datumi):
+
+            with red[i]:
+
+                st.markdown(
+                    f"""
+                    <div style="
+                    background:#1f8a3b;
+                    color:black;
+                    height:28px;
+                    border-radius:5px;
+                    text-align:center;
+                    font-size:11px;
+                    font-weight:bold;
+                    padding-top:5px;">
+                    {vreme}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
 
         trenutno += timedelta(minutes=15)
-
-
-    for vreme in vremena:
-
-        for d in datumi:
-
-            if "12:00" <= vreme < "13:00":
-
-                html += f"""
-                <div class="slot pauza">
-                    PAUZA
-                </div>
-                """
-
-            else:
-
-                html += f"""
-                <div class="slot slobodan">
-                    {vreme}
-                </div>
-                """
-
-
-    html += "</div></div>"
-
-    st.markdown(html, unsafe_allow_html=True)
-
-
 
 # --- ADMIN FUNKCIJE ZA METRIKE ---
 def get_unique_clients_count_for_date(datum):
