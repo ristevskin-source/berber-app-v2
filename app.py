@@ -133,7 +133,6 @@ def init_db():
     conn.close()
 
 # --- FUNKCIJE ZA GENERISANJE SLOTOVA ---
-# --- FUNKCIJE ZA GENERISANJE SLOTOVA ---
 def generisi_slotove_za_dan(datum):
     conn = sqlite3.connect('termini.db')
     c = conn.cursor()
@@ -205,7 +204,7 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
     if start_index is None:
         return None
 
-    broj_slotova = trajanje // 15
+    broj_slotova = trajanje // 30
 
     if start_index + broj_slotova > len(svi_slotovi):
         return None
@@ -228,7 +227,7 @@ def proveri_slotove_za_uslugu(datum, vreme, trajanje):
 
             razlika = (t2 - t1).seconds // 60
 
-            if razlika != 15:
+            if razlika != 30:
                 return None
 
         potrebni_slotovi.append(slot_vreme)
