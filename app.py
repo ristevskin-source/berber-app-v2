@@ -270,20 +270,19 @@ def prikazi_admin_raspored():
 
     datumi = generisi_datume()
 
-    # zaglavlje - dani
-    zaglavlje = st.columns(7)
+    # zaglavlje
+    cols = st.columns([0.55,1,1,1,1,1,1,1])
+
+    with cols[0]:
+        st.markdown("**Vreme**")
 
     for i, d in enumerate(datumi):
-        with zaglavlje[i]:
+        with cols[i+1]:
             st.markdown(
                 f"""
                 <div style="
-                background:#2b2b2b;
-                color:#d4af37;
                 text-align:center;
-                padding:6px;
-                border:1px solid #d4af37;
-                border-radius:6px;
+                color:#d4af37;
                 font-size:12px;">
                 <b>{d.strftime('%a')}<br>{d.strftime('%d.%m')}</b>
                 </div>
@@ -292,8 +291,8 @@ def prikazi_admin_raspored():
             )
 
 
-    trenutno = datetime.strptime("09:00", "%H:%M")
-    kraj = datetime.strptime("20:00", "%H:%M")
+    trenutno = datetime.strptime("09:00","%H:%M")
+    kraj = datetime.strptime("20:00","%H:%M")
 
 
     while trenutno < kraj:
@@ -301,32 +300,47 @@ def prikazi_admin_raspored():
         vreme = trenutno.strftime("%H:%M")
 
 
-        # pauza kao jedan informativni red
         if vreme == "12:00":
+
             st.markdown(
                 """
                 <div style="
-                background:#7a3030;
-                color:#ffdede;
-                text-align:center;
+                background:#8b3a3a;
+                color:white;
                 height:18px;
-                border-radius:4px;
-                font-size:11px;">
+                text-align:center;
+                font-size:11px;
+                border-radius:4px;">
                 PAUZA 12:00 - 13:00
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
-            trenutno = datetime.strptime("13:00", "%H:%M")
+            trenutno=datetime.strptime("13:00","%H:%M")
             continue
 
 
-        red = st.columns(7)
+        red = st.columns([0.55,1,1,1,1,1,1,1])
 
-        for i, d in enumerate(datumi):
 
-            with red[i]:
+        with red[0]:
+            st.markdown(
+                f"""
+                <div style="
+                text-align:center;
+                font-size:11px;
+                padding-top:7px;">
+                {vreme}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        for i in range(7):
+
+            with red[i+1]:
 
                 st.markdown(
                     f"""
@@ -337,8 +351,7 @@ def prikazi_admin_raspored():
                     border-radius:5px;
                     text-align:center;
                     font-size:11px;
-                    font-weight:bold;
-                    padding-top:5px;">
+                    padding-top:6px;">
                     {vreme}
                     </div>
                     """,
