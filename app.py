@@ -759,7 +759,6 @@ def prikaz_nedeljnog_kalendara():
 # ===================================================================
 
 init_db()
-resetuj_slotove()
 
 # Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
