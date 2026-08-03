@@ -134,19 +134,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    # --- JEDNOKRATNI RESET STARIH PRAZNIH SLOTOVA ---
-def resetuj_slotove():
-    conn = sqlite3.connect('termini.db')
-    c = conn.cursor()
-
-    c.execute("""
-        DELETE FROM rezervacije
-        WHERE ime IS NULL
-    """)
-
-    conn.commit()
-    conn.close()
-
+    
 # --- FUNKCIJE ZA GENERISANJE SLOTOVA ---
 def generisi_slotove_za_dan(datum):
     conn = sqlite3.connect('termini.db')
