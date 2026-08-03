@@ -116,10 +116,13 @@ def init_db():
     ]
 
     c.executemany(
-        "INSERT OR IGNORE INTO cenovnik (usluga, cena, trajanje) VALUES (?, ?, ?)",
-        usluge
-    )
-
+    """
+    INSERT OR REPLACE INTO cenovnik 
+    (usluga, cena, trajanje) 
+    VALUES (?, ?, ?)
+    """,
+    usluge
+)
     try:
         c.execute("ALTER TABLE rezervacije ADD COLUMN status TEXT DEFAULT 'zakazan'")
     except sqlite3.OperationalError:
