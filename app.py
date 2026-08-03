@@ -1078,3 +1078,20 @@ with tab2:
         # ---- KORAK 1: Nedeljni kalendar ----
         st.write("---")
         prikaz_nedeljnog_kalendara()
+
+        # ---- DETALJI IZABRANOG TERMINA ----
+        if st.session_state.get("izabrana_rezervacija"):
+
+            podaci = st.session_state["izabrana_rezervacija"]
+
+            st.write("---")
+            st.subheader("📌 Izabrani termin")
+
+            st.write(f"👤 Klijent: {podaci['ime']}")
+            st.write(f"📞 Telefon: {podaci['telefon']}")
+            st.write(f"✂️ Usluga: {podaci['usluga']}")
+            st.write(f"💰 Cena: {podaci['cena']} din")
+            st.write(f"📅 Datum: {st.session_state['izabrani_datum']}")
+            st.write(f"⏰ Vreme: {st.session_state['izabrani_termin']}")
+            st.write(f"📌 Status: {podaci['status']}")
+        
