@@ -625,204 +625,119 @@ def admin_rucno_zakazi():
 # NOVA FUNKCIJA ZA NEDELJNI KALENDAR (KORAK 1)
 # ============================================================
 def prikaz_nedeljnog_kalendara():
-    """
-    Prikaz nedeljne tabele sa slotovima.
-    - Fiksirana leva kolona (vreme)
-    - Horizontalni skrol za dane
-    - Vertikalni skrol za sve slotove
-    - Dugmad su kvadratna, klikabilna (za sada bez akcije)
-    """
-    st.subheader("📅 Nedeljni pregled")
+    st.subheader("📅 Nedeljni pregled termina")
 
-    # 1. Generiši datume za tekuću nedelju (ponedeljak - nedelja)
     danas = datetime.now().date()
     pocetak_nedelje = danas - timedelta(days=danas.weekday())
-    datumi = [pocetak_nedelje + timedelta(days=i) for i in range(7)]
 
-    # 2. Dohvati sve zauzete termine iz baze za te datume
-    conn = sqlite3.connect('termini.db')
+    datumi = [
+        pocetak_nedelje + timedelta(days=i)
+        for i in range(7)
+    ]
+
+    # uzimamo termine iz baze
+    conn = sqlite3.connect("termini.db")
     c = conn.cursor()
-    placeholders = ','.join(['?'] * len(datumi))
-    c.execute(f"""
-        SELECT datum, vreme, ime FROM rezervacije
-        WHERE datum IN ({placeholders})
-        AND ime IS NOT NULL
-    """, [d.strftime('%Y-%m-%d') for d in datumi])
-    zauzeti = c.fetchall()
+
+    c.execute("""
+        SELECT id, datum, vreme, ime, telefon, usluga, cena, status, payment_method
+        FROM rezervacije
+        WHERE datum BETWEEN ? AND ?
+        ORDER BY datum, vreme
+    """, (
+        datumi[0].strftime("%Y-%m-%d"),
+        datumi[-1].strftime("%Y-%m-%d")
+    ))
+
+    rezervacije = c.fetchall()
     conn.close()
 
-    # 3. Napravi set zauzetih (datum, vreme)
-    zauzeti_set = set((row[0], row[1]) for row in zauzeti)
+    # mapa zauzetih termina
+    zauzeti = {}
 
-    # 4. Generiši sve slotove od 09:00 do 20:00 (bez pauze 12-13h)
-    slotovi = []
+    for r in rezervacije:
+        rez_id, datum, vreme, ime, telefon, usluga, cena, status, payment = r
+
+        zauzeti[(datum, vreme)] = {
+            "id": rez_id,
+            "ime": ime,
+            "telefon": telefon,
+            "usluga": usluga,
+            "cena": cena,
+            "status": status,
+            "payment": payment
+        }
+
+
+    # zaglavlje dana
+    zaglavlje = st.columns(8)
+
+    with zaglavlje[0]:
+        st.write("**Vreme**")
+
+    for i, d in enumerate(datumi):
+        with zaglavlje[i+1]:
+            st.write(
+                f"**{d.strftime('%a %d.')}**"
+            )
+
+
+    # slotovi 09:00 - 20:00
     trenutno = datetime.strptime("09:00", "%H:%M")
     kraj = datetime.strptime("20:00", "%H:%M")
+
     while trenutno < kraj:
-        vreme_str = trenutno.strftime("%H:%M")
-        if "12:00" <= vreme_str < "13:00":
-            trenutno += timedelta(minutes=15)
-            continue
-        slotovi.append(vreme_str)
+
+        vreme = trenutno.strftime("%H:%M")
+
+        kolone = st.columns(8)
+
+        with kolone[0]:
+            st.write(vreme)
+
+        # pauza
+        if "12:00" <= vreme < "13:00":
+            for k in range(1,8):
+                with kolone[k]:
+                    st.button(
+                        "🚫",
+                        disabled=True,
+                        key=f"pauza_{vreme}_{k}"
+                    )
+
+        else:
+
+            for i, datum in enumerate(datumi):
+
+                datum_str = datum.strftime("%Y-%m-%d")
+
+                with kolone[i+1]:
+
+                    if (datum_str, vreme) in zauzeti:
+
+                        podaci = zauzeti[(datum_str, vreme)]
+
+                        if st.button(
+                            "🔴",
+                            key=f"zauzet_{datum_str}_{vreme}"
+                        ):
+                            st.session_state["izabrana_rezervacija"] = podaci
+                            st.session_state["izabrani_datum"] = datum_str
+                            st.session_state["izabrani_termin"] = vreme
+                            st.rerun()
+
+                    else:
+
+                        if st.button(
+                            "🟢",
+                            key=f"slobodan_{datum_str}_{vreme}"
+                        ):
+                            st.session_state["izabrani_rezervacija"] = None
+                            st.session_state["izabrani_datum"] = datum_str
+                            st.session_state["izabrani_termin"] = vreme
+                            st.rerun()
+
         trenutno += timedelta(minutes=15)
-
-    # 5. Pripremi podatke za HTML tabelu
-    dani_oznake = [d.strftime("%a %d.") for d in datumi]  # npr. "Pon 27."
-    dani_vrednosti = [d.strftime("%Y-%m-%d") for d in datumi]
-
-    # 6. Generiši HTML sa CSS za mobilni prikaz
-    html = f"""
-    <style>
-        .kalendar-wrapper {{
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 70vh;
-            -webkit-overflow-scrolling: touch;
-            margin: 10px 0;
-            border: 1px solid #444;
-            border-radius: 8px;
-            background-color: #1e1e1e;
-        }}
-        .kalendar-tabela {{
-            border-collapse: collapse;
-            width: 100%;
-            min-width: 600px;
-            font-size: 14px;
-            color: white;
-        }}
-        .kalendar-tabela th, .kalendar-tabela td {{
-            padding: 4px 2px;
-            text-align: center;
-            border-bottom: 1px solid #333;
-            border-right: 1px solid #333;
-        }}
-        .kalendar-tabela th {{
-            background-color: #2b2b2b;
-            color: #d4af37;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }}
-        .vreme-kolona {{
-            background-color: #2b2b2b;
-            font-weight: bold;
-            color: #aaa;
-            position: sticky;
-            left: 0;
-            z-index: 5;
-            min-width: 60px;
-            max-width: 60px;
-            white-space: nowrap;
-        }}
-        .slot-dugme {{
-            display: inline-block;
-            width: 44px;
-            height: 44px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 0px;
-            padding: 0;
-            margin: 0 auto;
-            transition: transform 0.1s;
-        }}
-        .slot-dugme:active {{
-            transform: scale(0.92);
-        }}
-        .slot-slobodan {{
-            background-color: #2e7d32;
-        }}
-        .slot-slobodan:hover {{
-            background-color: #43a047;
-        }}
-        .slot-zauzet {{
-            background-color: #c62828;
-        }}
-        .slot-zauzet:hover {{
-            background-color: #e53935;
-        }}
-        .slot-pauza {{
-            background-color: #666;
-            color: #aaa;
-            font-size: 12px;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            margin: 0 auto;
-        }}
-        /* Za mobilni: kolone za dane su šire od vremenske */
-        .dan-kolona {{
-            min-width: 64px;
-        }}
-        /* Skrol traka */
-        .kalendar-wrapper::-webkit-scrollbar {{
-            height: 6px;
-            width: 6px;
-        }}
-        .kalendar-wrapper::-webkit-scrollbar-track {{
-            background: #2b2b2b;
-        }}
-        .kalendar-wrapper::-webkit-scrollbar-thumb {{
-            background: #d4af37;
-            border-radius: 3px;
-        }}
-    </style>
-    <div class="kalendar-wrapper">
-    <table class="kalendar-tabela">
-        <thead>
-            <tr>
-                <th class="vreme-kolona">Vreme</th>
-    """
-    # Dodaj zaglavlja za dane
-    for oznaka in dani_oznake:
-        html += f"<th class='dan-kolona'>{oznaka}</th>"
-    html += """
-            </tr>
-        </thead>
-        <tbody>
-    """
-
-    # Redovi za svaki slot
-    for slot in slotovi:
-        html += f"<tr><td class='vreme-kolona'>{slot}</td>"
-        for i, datum in enumerate(dani_vrednosti):
-            if (datum, slot) in zauzeti_set:
-                # Zauzeto - crveno dugme (za sada bez akcije)
-                html += f"""
-                    <td class='dan-kolona'>
-                        <button class='slot-dugme slot-zauzet' 
-                                id='z_{datum}_{slot}' 
-                                onclick='alert("Zauzet slot")'>
-                        </button>
-                    </td>
-                """
-            else:
-                # Slobodno - zeleno dugme (za sada bez akcije)
-                html += f"""
-                    <td class='dan-kolona'>
-                        <button class='slot-dugme slot-slobodan' 
-                                id='s_{datum}_{slot}' 
-                                onclick='alert("Slobodan slot")'>
-                        </button>
-                    </td>
-                """
-        html += "</tr>"
-
-    html += """
-        </tbody>
-    </table>
-    </div>
-    """
-
-    # 7. Prikaži HTML u Streamlit-u
-    components.html(html, height=600, scrolling=False)
-
-    # Dodatno obaveštenje (privremeno)
-    st.caption("ℹ️ Dugmad su trenutno samo vizuelna (bez akcije). Klik prikazuje alert.")
 
 # ===================================================================
 # GLAVNI DEO APLIKACIJE
