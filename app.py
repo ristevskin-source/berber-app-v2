@@ -134,6 +134,18 @@ def init_db():
 
     conn.commit()
     conn.close()
+    # --- JEDNOKRATNI RESET STARIH PRAZNIH SLOTOVA ---
+def resetuj_slotove():
+    conn = sqlite3.connect('termini.db')
+    c = conn.cursor()
+
+    c.execute("""
+        DELETE FROM rezervacije
+        WHERE ime IS NULL
+    """)
+
+    conn.commit()
+    conn.close()
 
 # --- FUNKCIJE ZA GENERISANJE SLOTOVA ---
 def generisi_slotove_za_dan(datum):
@@ -747,6 +759,7 @@ def prikaz_nedeljnog_kalendara():
 # ===================================================================
 
 init_db()
+resetuj_slotove()
 
 # Inicijalizacija session_state
 if 'izabrana_usluga' not in st.session_state:
