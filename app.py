@@ -106,13 +106,13 @@ def init_db():
     )''')
 
     usluge = [
-        ('💇 Šišanje', 1500, 45),
+        ('💇 Šišanje', 1500, 60),
         ('💇 Šišanje + pranje kose', 1900, 60),
         ('💇 Šišanje + brada', 2000, 60),
-        ('💇 Šišanje + brada + pranje kose', 2400, 75),
+        ('💇 Šišanje + brada + pranje kose', 2400, 90),
         ('💇 Šišanje + brada + pranje kose + obrve', 2800, 90),
         ('🧔 Brada (samo)', 1000, 30),
-        ('✨ Obrve (samo)', 400, 15)
+        ('✨ Obrve (samo)', 400, 30)
     ]
 
     c.executemany(
