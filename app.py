@@ -655,16 +655,16 @@ def prikaz_nedeljnog_kalendara():
     for r in rezervacije:
         rez_id, datum, vreme, ime, telefon, usluga, cena, status, payment = r
 
-        zauzeti[(datum, vreme)] = {
-            "id": rez_id,
-            "ime": ime,
-            "telefon": telefon,
-            "usluga": usluga,
-            "cena": cena,
-            "status": status,
-            "payment": payment
-        }
-
+        if ime is not None:
+            zauzeti[(datum, vreme)] = {
+                "id": rez_id,
+                "ime": ime,
+                "telefon": telefon,
+                "usluga": usluga,
+                "cena": cena,
+                "status": status,
+                "payment": payment
+            }
 
     # zaglavlje dana
     zaglavlje = st.columns(8)
