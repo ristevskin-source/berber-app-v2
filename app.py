@@ -647,6 +647,7 @@ def prikaz_nedeljnog_kalendara():
     ))
 
     rezervacije = c.fetchall()
+    st.write("TEST REZERVACIJE:", rezervacije)
     conn.close()
 
     # mapa zauzetih termina
