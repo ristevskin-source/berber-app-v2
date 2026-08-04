@@ -1074,6 +1074,7 @@ with tab2:
         prikaz_nedeljnog_kalendara()
 
         # ---- DETALJI IZABRANOG TERMINA ----
+        st.write("DEBUG SESSION:", st.session_state.get("izabrana_rezervacija"))
         if st.session_state.get("izabrana_rezervacija"):
 
             podaci = st.session_state["izabrana_rezervacija"]
