@@ -631,7 +631,7 @@ def prikaz_nedeljnog_kalendara():
     st.subheader("📅 Nedeljni pregled termina")
 
     datumi = generisi_datume()
-    st.write("DEBUG DATUMI:", datumi)
+    
     # uzimamo termine iz baze
     conn = sqlite3.connect("termini.db")
     c = conn.cursor()
@@ -673,9 +673,9 @@ def prikaz_nedeljnog_kalendara():
         st.write("**Vreme**")
 
     for i, d in enumerate(datumi):
-        with zaglavlje[i+1]:
-            st.write(
-            f"**INDEX {i}: {d.strftime('%d.%m.%Y')}**"
+    with zaglavlje[i+1]:
+        st.write(
+            f"**{d.strftime('%a %d.')}**"
         )
 
     # slotovi 09:00 - 20:00
