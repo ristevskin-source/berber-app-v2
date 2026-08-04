@@ -674,7 +674,7 @@ def prikaz_nedeljnog_kalendara():
 
     for i, d in enumerate(datumi):
         with zaglavlje[i+1]:
-        st.write(
+            st.write(
             f"**INDEX {i}: {d.strftime('%d.%m.%Y')}**"
         )
 
