@@ -670,7 +670,7 @@ def prikaz_nedeljnog_kalendara():
     zaglavlje = st.columns(8)
 
     with zaglavlje[0]:
-    st.write("**Vreme**")
+        st.write("**Vreme**")
 
     for i, d in enumerate(datumi):
         with zaglavlje[i+1]:
