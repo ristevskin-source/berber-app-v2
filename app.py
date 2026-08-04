@@ -673,9 +673,9 @@ def prikaz_nedeljnog_kalendara():
         st.write("**Vreme**")
 
     for i, d in enumerate(datumi):
-     with zaglavlje[i+1]:
+    with zaglavlje[i+1]:
         st.write(
-            f"**{d.strftime('%a %d.')}**"
+            f"**{d}**"
         )
 
     # slotovi 09:00 - 20:00
