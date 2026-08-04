@@ -631,6 +631,7 @@ def prikaz_nedeljnog_kalendara():
     st.subheader("📅 Nedeljni pregled termina")
 
     datumi = generisi_datume()
+    st.write("DEBUG DATUMI:", datumi)
     # uzimamo termine iz baze
     conn = sqlite3.connect("termini.db")
     c = conn.cursor()
