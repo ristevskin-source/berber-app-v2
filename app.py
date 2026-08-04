@@ -729,7 +729,8 @@ def prikaz_nedeljnog_kalendara():
                             "🟢",
                             key=f"slobodan_{datum_str}_{vreme}"
                         ):
-                            st.session_state["izabrani_rezervacija"] = None
+                            st.session_state["izabrana_rezervacija"] = None
+                            st.write("KLIK ZELENO:", datum_str, vreme)
                             st.session_state["izabrani_datum"] = datum_str
                             st.session_state["izabrani_termin"] = vreme
                             st.rerun()
