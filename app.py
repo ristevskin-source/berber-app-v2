@@ -630,14 +630,7 @@ def admin_rucno_zakazi():
 def prikaz_nedeljnog_kalendara():
     st.subheader("📅 Nedeljni pregled termina")
 
-    danas = datetime.now().date()
-    pocetak_nedelje = danas - timedelta(days=danas.weekday())
-
-    datumi = [
-        pocetak_nedelje + timedelta(days=i)
-        for i in range(7)
-    ]
-
+    datumi = generisi_datume()
     # uzimamo termine iz baze
     conn = sqlite3.connect("termini.db")
     c = conn.cursor()
