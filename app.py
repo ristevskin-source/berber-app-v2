@@ -727,7 +727,7 @@ def prikaz_nedeljnog_kalendara():
 
                         if st.button(
                             "🟢",
-                            key=f"slobodan_{datum_str}_{vreme}"
+                            key=f"slobodan_{datum_str}_{vreme}" 
                         ):
                             st.session_state["izabrana_rezervacija"] = None
                             st.session_state["izabrani_datum"] = datum_str
