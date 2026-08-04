@@ -647,7 +647,6 @@ def prikaz_nedeljnog_kalendara():
     ))
 
     rezervacije = c.fetchall()
-    st.write("TEST ZAUZETI:", [r for r in rezervacije if r[3] is not None])
     conn.close()
 
     # mapa zauzetih termina
