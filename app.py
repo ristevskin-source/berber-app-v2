@@ -675,9 +675,8 @@ def prikaz_nedeljnog_kalendara():
     for i, d in enumerate(datumi):
     with zaglavlje[i+1]:
         st.write(
-            f"**INDEX {i} - {d}**"
+            f"**INDEX {i}: {d.strftime('%d.%m.%Y')}**"
         )
-
 
     # slotovi 09:00 - 20:00
     trenutno = datetime.strptime("09:00", "%H:%M")
