@@ -1078,7 +1078,6 @@ with tab2:
 
         
 
-<<<<<<< HEAD
     podaci = st.session_state["izabrana_rezervacija"]
 
     # pronađi glavnu rezervaciju sa cenom
@@ -1118,5 +1117,3 @@ with tab2:
         st.write(f"⏰ Vreme početka: {st.session_state['izabrani_termin']}")
         st.write(f"📌 Status: {podaci['status']}")
 
-=======
->>>>>>> 982c3197000baa3116c4eb8d73874adb8bb04af8
