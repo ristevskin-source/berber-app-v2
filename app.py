@@ -1075,7 +1075,7 @@ with tab2:
 
         
 
-    podaci = st.session_state["izabrana_rezervacija"]
+    podaci = st.session_state.get("izabrana_rezervacija")
 
     # pronađi glavnu rezervaciju sa cenom
     conn = sqlite3.connect("termini.db")
