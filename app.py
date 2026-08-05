@@ -1016,6 +1016,7 @@ with tab2:
                     with cols[4]:
                         st.write("STATUS:", status)   
                         if status == 'zakazan':
+                                st.write("ULAZIM U ZAKAZAN")
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
                                     otkazi_termin(id)
