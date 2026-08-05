@@ -1019,6 +1019,8 @@ with tab2:
 
                         if status.strip() == 'zakazan':
                             st.write("ULAZIM U ZAKAZAN")
+                            st.write("OVDE TREBA DA BUDE DUGME")
+                            if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}")     
 
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
