@@ -1013,7 +1013,7 @@ with tab2:
                         st.write(telefon)
                     with cols[3]:
                         st.write(f"{usluga} ({cena} din)")
-                                        with cols[4]:
+                    with cols[4]:
                         st.write("STATUS:", repr(status))
 
                         if status.strip() == 'zakazan':
