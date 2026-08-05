@@ -667,7 +667,7 @@ def prikaz_nedeljnog_kalendara():
             }
 
     # zaglavlje dana
-    zaglavlje = st.columns(8)
+    zaglavlje = st.columns([0.5] + [1]*7)
 
     with zaglavlje[0]:
         st.write("**Vreme**")
@@ -686,7 +686,7 @@ def prikaz_nedeljnog_kalendara():
 
         vreme = trenutno.strftime("%H:%M")
 
-        kolone = st.columns(8)
+        kolone = st.columns([0.5] + [1]*7)
 
         with kolone[0]:
             st.write(vreme)
@@ -715,7 +715,8 @@ def prikaz_nedeljnog_kalendara():
 
                         if st.button(
                             "🔴",
-                            key=f"zauzet_{datum_str}_{vreme}"
+                            key=f"zauzet_{datum_str}_{vreme}",
+                            use_container_width=True
                         ):
                             st.session_state["izabrana_rezervacija"] = podaci
                             st.session_state["izabrani_datum"] = datum_str
@@ -726,7 +727,8 @@ def prikaz_nedeljnog_kalendara():
 
                         if st.button(
                             "🟢",
-                            key=f"slobodan_{datum_str}_{vreme}" 
+                            key=f"slobodan_{datum_str}_{vreme}", 
+                            use_container_width=True
                         ):
                             st.session_state["izabrana_rezervacija"] = None
                             st.session_state["izabrani_datum"] = datum_str
