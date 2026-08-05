@@ -1015,9 +1015,7 @@ with tab2:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
                         st.write(f"DEBUG status = '{status}'")
-                        st.write("STATUS:", repr(status))
-
-                            if status.strip() == 'zakazan':
+                        st.write("STATUS:", repr(status))                                                                                                                       if status.strip() == 'zakazan':
                             st.write("ULAZIM U ZAKAZAN")
                             st.write("OVDE TREBA DA BUDE DUGME")
 
