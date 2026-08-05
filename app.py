@@ -1095,7 +1095,7 @@ with tab2:
         podaci["ime"],
         podaci["telefon"],
         podaci["usluga"]
-    ))f
+    ))
 
     glavna = c.fetchone()
     conn.close()
