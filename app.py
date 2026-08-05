@@ -1017,23 +1017,24 @@ with tab2:
                         st.write(f"DEBUG status = '{status}'")
                         st.write("STATUS:", repr(status))
 
-                        if status.strip() == 'zakazan':
-                            st.write("ULAZIM U ZAKAZAN")
-                            st.write("OVDE TREBA DA BUDE DUGME")  
+                                            if status.strip() == 'zakazan':
+                        st.write("ULAZIM U ZAKAZAN")
+                        st.write("OVDE TREBA DA BUDE DUGME")
+
                         if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
-                                for id in ids:
-                                    otkazi_termin(id)
-                                st.rerun()
+                            for id in ids:
+                                otkazi_termin(id)
+                            st.rerun()
 
-                            if st.button("💰 Naplati", key=f"naplati_grupa_{ids[0]}"):
-                                st.session_state['naplata_id'] = ids
-                                st.rerun()
+                        if st.button("💰 Naplati", key=f"naplati_grupa_{ids[0]}"):
+                            st.session_state['naplata_id'] = ids
+                            st.rerun()
 
-                        elif status.strip() == 'naplacen':
-                            st.success(f"✅ Naplaćeno ({payment_method})")
+                    elif status.strip() == 'naplacen':
+                        st.success(f"✅ Naplaćeno ({payment_method})")
 
-                        elif status.strip() == 'otkazan':
-                            st.warning("❌ Otkazano")
+                    elif status.strip() == 'otkazan':
+                        st.warning("❌ Otkazano")
 
 
                     with cols[5]:
