@@ -1013,10 +1013,12 @@ with tab2:
                         st.write(telefon)
                     with cols[3]:
                         st.write(f"{usluga} ({cena} din)")
-                    with cols[4]:
-                        st.write("STATUS:", repr(status))   
-                        if status == 'zakazan':
-                                st.write("ULAZIM U ZAKAZAN")
+                                        with cols[4]:
+                        st.write("STATUS:", repr(status))
+
+                        if status.strip() == 'zakazan':
+                            st.write("ULAZIM U ZAKAZAN")
+
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
                                     otkazi_termin(id)
@@ -1026,10 +1028,10 @@ with tab2:
                                 st.session_state['naplata_id'] = ids
                                 st.rerun()
 
-                        elif status == 'naplacen':
+                        elif status.strip() == 'naplacen':
                             st.success(f"✅ Naplaćeno ({payment_method})")
 
-                        elif status == 'otkazan':
+                        elif status.strip() == 'otkazan':
                             st.warning("❌ Otkazano")
 
 
