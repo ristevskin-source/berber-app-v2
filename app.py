@@ -1013,6 +1013,7 @@ with tab2:
                     with cols[3]:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
+                        st.write("OVDE SAM")
                         if status == 'zakazan':
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
