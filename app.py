@@ -1014,7 +1014,7 @@ with tab2:
                     with cols[3]:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
-                        st.write("STATUS:", status)   
+                        st.write("STATUS:", repr(status))   
                         if status == 'zakazan':
                                 st.write("ULAZIM U ZAKAZAN")
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
