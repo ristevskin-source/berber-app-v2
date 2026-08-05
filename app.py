@@ -1015,9 +1015,8 @@ with tab2:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
                         st.write(f"DEBUG status = '{status}'")
-                        st.write("STATUS:", repr(status))                                                                                                                       if status.strip() == 'zakazan':
-                            st.write("ULAZIM U ZAKAZAN")
-                            st.write("OVDE TREBA DA BUDE DUGME")
+                        st.write("STATUS:", repr(status))
+                        if status.strip() == 'zakazan':
 
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
@@ -1032,7 +1031,7 @@ with tab2:
                             st.success(f"✅ Naplaćeno ({payment_method})")
 
                         elif status.strip() == 'otkazan':
-                            st.warning("❌ Otkazano")
+                            st.warning("❌ Otkazano")                    
 
                     with cols[5]:
                         if status == 'zakazan' and st.session_state.get('naplata_id') == ids:
