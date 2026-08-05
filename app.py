@@ -1014,16 +1014,14 @@ with tab2:
                     with cols[3]:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
-
-                        st.write("KOLONA 4 RADI")
-                        if status == 'zakazan':
                         st.write(f"DEBUG status = '{status}'")
                         st.write("STATUS:", repr(status))
 
                         if status.strip() == 'zakazan':
                             st.write("ULAZIM U ZAKAZAN")
-                            st.write("OVDE TREBA DA BUDE DUGME")  
-                        if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
+                            st.write("OVDE TREBA DA BUDE DUGME")
+
+                            if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
                                     otkazi_termin(id)
                                 st.rerun()
