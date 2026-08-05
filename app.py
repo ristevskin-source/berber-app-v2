@@ -966,6 +966,7 @@ with tab2:
         """, (admin_datum,))
         rows = c.fetchall()
         conn.close()
+        st.write("BROJ REDOVA:", len(rows))
         conn = sqlite3.connect('termini.db')
         c = conn.cursor()
    
