@@ -1004,7 +1004,7 @@ with tab2:
                     vreme_prikaz = f"{vremena[0]} – {vremena[-1]}"
                 
                 with st.container():
-                    cols = st.columns([1.2, 1.5, 1.2, 2, 1.2, 1.5])
+                    cols = st.columns([1.2, 1.5, 1.2, 2, 2, 1.5])
                     with cols[0]:
                         st.write(vreme_prikaz)
                     with cols[1]:
@@ -1014,14 +1014,16 @@ with tab2:
                     with cols[3]:
                         st.write(f"{usluga} ({cena} din)")
                     with cols[4]:
+
+                        st.write("KOLONA 4 RADI")
+                        if status == 'zakazan':
                         st.write(f"DEBUG status = '{status}'")
                         st.write("STATUS:", repr(status))
 
                         if status.strip() == 'zakazan':
                             st.write("ULAZIM U ZAKAZAN")
                             st.write("OVDE TREBA DA BUDE DUGME")  
-
-                            if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
+                        if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
                                     otkazi_termin(id)
                                 st.rerun()
@@ -1078,3 +1080,46 @@ with tab2:
             st.info(f"Nema zakazanih klijenata za {formatiraj_datum(admin_datum)}.")
 
         
+
+<<<<<<< HEAD
+    podaci = st.session_state["izabrana_rezervacija"]
+
+    # pronađi glavnu rezervaciju sa cenom
+    conn = sqlite3.connect("termini.db")
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT cena
+        FROM rezervacije
+        WHERE datum=?
+        AND ime=?
+        AND telefon=?
+        AND usluga=?
+        AND cena > 0
+        LIMIT 1
+    """, (
+        st.session_state["izabrani_datum"],
+        podaci["ime"],
+        podaci["telefon"],
+        podaci["usluga"]
+    ))f
+
+    glavna = c.fetchone()
+    conn.close()
+
+    prava_cena = glavna[0] if glavna else podaci["cena"]
+
+    st.write("---")
+
+    with st.expander("📌 Detalji rezervacije", expanded=True):
+
+        st.write(f"👤 Klijent: {podaci['ime']}")
+        st.write(f"📞 Telefon: {podaci['telefon']}")
+        st.write(f"✂️ Usluga: {podaci['usluga']}")
+        st.write(f"💰 Cena: {prava_cena} din")
+        st.write(f"📅 Datum: {st.session_state['izabrani_datum']}")
+        st.write(f"⏰ Vreme početka: {st.session_state['izabrani_termin']}")
+        st.write(f"📌 Status: {podaci['status']}")
+
+=======
+>>>>>>> 982c3197000baa3116c4eb8d73874adb8bb04af8
