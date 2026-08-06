@@ -1075,9 +1075,6 @@ else:
     st.info(
         f"Nema zakazanih klijenata za {formatiraj_datum(admin_datum)}."
     )
-    )
-
-        
 
     podaci = st.session_state.get("izabrana_rezervacija")
     if podaci:
