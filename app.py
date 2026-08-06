@@ -970,6 +970,7 @@ conn.close()
 
 st.write("BROJ REDOVA:", len(rows))
 
+
 if rows:
 
     grupe = {}
@@ -1006,59 +1007,64 @@ if rows:
         cena = data["cena"]
         payment_method = data["payment_method"]
 
-        if len(vremena) == 1:
-            vreme_prikaz = vremena[0]
-        else:
+        if len(vremena) > 1:
             vreme_prikaz = f"{vremena[0]} – {vremena[-1]}"
+        else:
+            vreme_prikaz = vremena[0]
 
 
-        cols = st.columns([1.3, 1.5, 1.5, 2.5, 1.8])
+        with st.container():
 
-        with cols[0]:
-            st.write(vreme_prikaz)
+            cols = st.columns([1.3, 1.5, 1.5, 2.5, 2])
 
-        with cols[1]:
-            st.write(ime)
+            with cols[0]:
+                st.write(vreme_prikaz)
 
-        with cols[2]:
-            st.write(telefon)
+            with cols[1]:
+                st.write(ime)
 
-        with cols[3]:
-            st.write(f"{usluga} ({cena} din)")
+            with cols[2]:
+                st.write(telefon)
 
-
-        with cols[4]:
-
-            if status == "zakazan":
-
-                if st.button(
-                    "❌ Otkaži",
-                    key=f"otkazi_{ids[0]}"
-                ):
-                    for id in ids:
-                        otkazi_termin(id)
-
-                    st.rerun()
+            with cols[3]:
+                st.write(f"{usluga} ({cena} din)")
 
 
-                if st.button(
-                    "💰 Naplati",
-                    key=f"naplati_{ids[0]}"
-                ):
-                    st.session_state["naplata_id"] = ids
-                    st.rerun()
+            with cols[4]:
+
+                if status == "zakazan":
+
+                    col_a, col_b = st.columns(2)
+
+                    with col_a:
+                        if st.button(
+                            "❌",
+                            key=f"otkazi_{ids[0]}"
+                        ):
+                            for id in ids:
+                                otkazi_termin(id)
+
+                            st.rerun()
 
 
-            elif status == "naplacen":
+                    with col_b:
+                        if st.button(
+                            "💰",
+                            key=f"naplati_{ids[0]}"
+                        ):
+                            st.session_state["naplata_id"] = ids
+                            st.rerun()
 
-                st.success(
-                    f"✅ Naplaćeno ({payment_method})"
-                )
 
+                elif status == "naplacen":
 
-            elif status == "otkazan":
+                    st.success(
+                        f"✅ {payment_method}"
+                    )
 
-                st.warning("❌ Otkazano")
+                elif status == "otkazan":
+
+                    st.warning("❌")
 
 
         st.markdown("---")
@@ -1068,6 +1074,7 @@ else:
 
     st.info(
         f"Nema zakazanih klijenata za {formatiraj_datum(admin_datum)}."
+    )
     )
 
         
