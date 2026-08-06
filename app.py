@@ -1076,41 +1076,42 @@ with tab2:
         
 
     podaci = st.session_state.get("izabrana_rezervacija")
+    if podaci:
 
-    # pronađi glavnu rezervaciju sa cenom
-    conn = sqlite3.connect("termini.db")
-    c = conn.cursor()
+     # pronađi glavnu rezervaciju sa cenom
+     conn = sqlite3.connect("termini.db")
+     c = conn.cursor()
 
-    c.execute("""
-        SELECT cena
-        FROM rezervacije
-        WHERE datum=?
-        AND ime=?
-        AND telefon=?
-        AND usluga=?
-        AND cena > 0
-        LIMIT 1
-    """, (
-        st.session_state.get("izabrani_datum"),
-        podaci["ime"],
-        podaci["telefon"],
-        podaci["usluga"]
-    ))
+     c.execute("""
+         SELECT cena
+         FROM rezervacije
+         WHERE datum=?
+         AND ime=?
+         AND telefon=?
+         AND usluga=?
+         AND cena > 0
+         LIMIT 1
+     """, (
+         st.session_state.get("izabrani_datum"),
+         podaci["ime"],
+         podaci["telefon"],
+         podaci["usluga"]
+     ))
 
-    glavna = c.fetchone()
-    conn.close()
+     glavna = c.fetchone()
+     conn.close()
 
-    prava_cena = glavna[0] if glavna else podaci["cena"]
+     prava_cena = glavna[0] if glavna else podaci["cena"]
 
-    st.write("---")
+     st.write("---")
 
-    with st.expander("📌 Detalji rezervacije", expanded=True):
+     with st.expander("📌 Detalji rezervacije", expanded=True):
 
-        st.write(f"👤 Klijent: {podaci['ime']}")
-        st.write(f"📞 Telefon: {podaci['telefon']}")
-        st.write(f"✂️ Usluga: {podaci['usluga']}")
-        st.write(f"💰 Cena: {prava_cena} din")
-        st.write(f"📅 Datum: {st.session_state['izabrani_datum']}")
-        st.write(f"⏰ Vreme početka: {st.session_state['izabrani_termin']}")
-        st.write(f"📌 Status: {podaci['status']}")
+         st.write(f"👤 Klijent: {podaci['ime']}")
+         st.write(f"📞 Telefon: {podaci['telefon']}")
+         st.write(f"✂️ Usluga: {podaci['usluga']}")
+         st.write(f"💰 Cena: {prava_cena} din")
+         st.write(f"📅 Datum: {st.session_state['izabrani_datum']}")
+         st.write(f"⏰ Vreme početka: {st.session_state['izabrani_termin']}")
+         st.write(f"📌 Status: {podaci['status']}")
 
