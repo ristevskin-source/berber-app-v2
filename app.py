@@ -1091,7 +1091,7 @@ with tab2:
         AND cena > 0
         LIMIT 1
     """, (
-        st.session_state["izabrani_datum"],
+        st.session_state.get("izabrani_datum"),
         podaci["ime"],
         podaci["telefon"],
         podaci["usluga"]
