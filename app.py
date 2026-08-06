@@ -1016,7 +1016,7 @@ with tab2:
                     with cols[4]:
                         st.write("STATUS =", repr(status))
                         if status.strip() == 'zakazan':
-                           st.write("AKCIJE")
+                            st.write("AKCIJE")
 
                             if st.button("❌ Otkaži", key=f"otkazi_grupa_{ids[0]}"):
                                 for id in ids:
