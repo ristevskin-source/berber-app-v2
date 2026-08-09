@@ -1098,14 +1098,185 @@ def ucitaj_rezervacije_za_datum(datum):
 # ADMIN - TABELA
 # ============================================================
 @st.dialog("👤 Detalji termina")
-def popup_zauzet_termin(ime, telefon, usluga, cena, datum, vreme):
+def popup_zauzet_termin(
+    podatak,
+    ids,
+    vremena,
+    datum,
+    vreme
+):
 
-    st.write(f"**Klijent:** {ime}")
-    st.write(f"**Telefon:** {telefon}")
-    st.write(f"**Usluga:** {usluga}")
-    st.write(f"**Cena:** {cena} din")
-    st.write(f"**Datum:** {datum}")
-    st.write(f"**Vreme:** {vreme}")
+    st.subheader("👤 Detalji klijenta")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.write(
+            f"**Ime:** {podatak['ime']}"
+        )
+
+        st.write(
+            f"**Telefon:** {podatak['telefon']}"
+        )
+
+    with col2:
+
+        st.write(
+            f"**Usluga:** {podatak['usluga']}"
+        )
+
+        st.write(
+            f"**Cena:** {podatak['cena']} din"
+        )
+
+    st.write(
+        f"**Datum:** "
+        f"{formatiraj_datum(datum)}"
+    )
+
+    st.write(
+        f"**Vreme:** {vreme}"
+    )
+
+    st.markdown("---")
+
+    # ====================================================
+    # AKCIJE
+    # ====================================================
+
+    if podatak["status"] == "zakazan":
+
+        a1, a2, a3 = st.columns(3)
+
+        with a1:
+
+            if st.button(
+                "❌ Otkaži",
+                key=f"popup_otkazi_{datum}_{vreme}",
+                use_container_width=True
+            ):
+
+                otkazi_termin(ids)
+
+                st.session_state[
+                    "kalendar_klik"
+                ] = None
+
+                st.session_state[
+                    "naplata_id"
+                ] = None
+
+                st.rerun()
+
+        with a2:
+
+            if st.button(
+                "💰 Naplati",
+                key=f"popup_naplati_{datum}_{vreme}",
+                use_container_width=True
+            ):
+
+                st.session_state[
+                    "naplata_id"
+                ] = ids
+
+                st.rerun()
+
+        with a3:
+
+            if st.button(
+                "✖️ Zatvori",
+                key=f"popup_zatvori_{datum}_{vreme}",
+                use_container_width=True
+            ):
+
+                st.session_state[
+                    "kalendar_klik"
+                ] = None
+
+                st.session_state[
+                    "naplata_id"
+                ] = None
+
+                st.rerun()
+
+    # ====================================================
+    # NAPLATA
+    # ====================================================
+
+    if (
+        st.session_state.get(
+            "naplata_id"
+        ) == ids
+    ):
+
+        st.markdown("---")
+
+        st.write(
+            f"💰 **Naplata: "
+            f"{podatak['ime']} — "
+            f"{podatak['cena']} din**"
+        )
+
+        izbor = st.radio(
+            "Način plaćanja",
+            ["Keš", "Kartica"],
+            horizontal=True,
+            key=f"popup_placanje_{datum}_{vreme}"
+        )
+
+        p1, p2 = st.columns(2)
+
+        with p1:
+
+            if st.button(
+                "✅ Potvrdi naplatu",
+                key=f"popup_potvrdi_{datum}_{vreme}",
+                use_container_width=True
+            ):
+
+                if moze_naplata(
+                    datum,
+                    vremena
+                ):
+
+                    naplati_termin(
+                        ids,
+                        izbor
+                    )
+
+                    st.session_state[
+                        "naplata_id"
+                    ] = None
+
+                    st.session_state[
+                        "kalendar_klik"
+                    ] = None
+
+                    st.rerun()
+
+                else:
+
+                    st.warning(
+                        "⏳ Termin još nije završen. "
+                        "Naplata nije moguća pre "
+                        "završetka usluge."
+                    )
+
+        with p2:
+
+            if st.button(
+                "Odustani",
+                key=f"popup_odustani_{datum}_{vreme}",
+                use_container_width=True
+            ):
+
+                st.session_state[
+                    "naplata_id"
+                ] = None
+
+                st.rerun()
 
 def prikaz_nedeljnog_kalendara(admin_datum):
 
@@ -1775,145 +1946,15 @@ ids = []
     vremena = sorted(
         set(vremena)
     )
+    popup_zauzet_termin(
+    podatak,
+    ids,
+    vremena,
+    datum,
+    vreme
+    )
 
-    # ====================================================
-    # AKCIJE
-    # ====================================================
-
-    if podatak["status"] == "zakazan":
-
-        a1, a2, a3 = st.columns(3)
-
-        with a1:
-
-            if st.button(
-                "❌ Otkaži",
-                key=f"otkazi_{datum}_{vreme}",
-                use_container_width=True
-            ):
-
-                otkazi_termin(
-                    ids
-                )
-
-                st.session_state[
-                    "kalendar_klik"
-                ] = None
-
-                st.session_state[
-                    "naplata_id"
-                ] = None
-
-                st.rerun()
-
-        with a2:
-
-            if st.button(
-                "💰 Naplati",
-                key=f"naplati_{datum}_{vreme}",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "naplata_id"
-                ] = ids
-
-                st.rerun()
-
-        with a3:
-
-            if st.button(
-                "✖️ Zatvori",
-                key=f"zatvori_{datum}_{vreme}",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "kalendar_klik"
-                ] = None
-
-                st.session_state[
-                    "naplata_id"
-                ] = None
-
-                st.rerun()
-
-        # =================================================
-        # PANEL ZA NAPLATU
-        # =================================================
-
-        if (
-            st.session_state.get(
-                "naplata_id"
-            ) == ids
-        ):
-
-            st.markdown("---")
-
-            st.write(
-                f"💰 **Naplata: "
-                f"{podatak['ime']} — "
-                f"{podatak['cena']} din**"
-            )
-
-            izbor = st.radio(
-                "Način plaćanja",
-                ["Keš", "Kartica"],
-                horizontal=True,
-                key=f"placanje_{datum}_{vreme}"
-            )
-
-            p1, p2 = st.columns(2)
-
-            with p1:
-
-                if st.button(
-                    "✅ Potvrdi naplatu",
-                    key=f"potvrdi_{datum}_{vreme}",
-                    use_container_width=True
-                ):
-
-                    if moze_naplata(
-                        datum,
-                        vremena
-                    ):
-
-                        naplati_termin(
-                            ids,
-                            izbor
-                        )
-
-                        st.session_state[
-                            "naplata_id"
-                        ] = None
-
-                        st.session_state[
-                            "kalendar_klik"
-                        ] = None
-
-                        st.rerun()
-
-                    else:
-
-                        st.warning(
-                            "⏳ Termin još nije završen. "
-                            "Naplata nije moguća pre "
-                            "završetka usluge."
-                        )
-
-            with p2:
-
-                if st.button(
-                    "Odustani",
-                    key=f"odustani_naplata_{datum}_{vreme}",
-                    use_container_width=True
-                ):
-
-                    st.session_state[
-                        "naplata_id"
-                    ] = None
-
-                    st.rerun()
+   
 
     # ====================================================
     # VEĆ NAPLAĆENO
