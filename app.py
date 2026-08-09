@@ -1924,7 +1924,7 @@ ids = []
 
 vremena = []
 
-    for (d, v), p in podaci_termina.items():
+for (d, v), p in podaci_termina.items():
 
         if (
             d == datum
