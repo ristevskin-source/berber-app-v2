@@ -1939,7 +1939,7 @@ for (d, v), p in podaci_termina.items():
 
             vremena.append(v)
 
-    ids = sorted(
+ids = sorted(
         set(ids)
     )
 
