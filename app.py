@@ -1867,54 +1867,54 @@ def prikaz_nedeljnog_kalendara(admin_datum):
             st.rerun()
 
         return
-# ====================================================
-# ZAUZET TERMIN
-# ====================================================
+    # ====================================================
+    # ZAUZET TERMIN
+    # ====================================================
 
-podatak = podaci_termina.get(
-    (datum, vreme)
-)
-
-if podatak is None:
-
-    st.warning(
-        "Podaci za ovaj termin "
-        "nisu pronađeni."
+    podatak = podaci_termina.get(
+        (datum, vreme)
     )
 
-    st.session_state[
-        "kalendar_klik"
-    ] = None
+    if podatak is None:
 
-    return
+        st.warning(
+            "Podaci za ovaj termin "
+            "nisu pronađeni."
+        )
 
-st.divider()
+        st.session_state[
+            "kalendar_klik"
+        ] = None
 
-st.subheader(
-    "👤 Detalji klijenta"
-)
+        return
 
-col1, col2 = st.columns(2)
+    st.divider()
 
-with col1:
-
-    st.write(
-        f"**Ime:** {podatak['ime']}"
+    st.subheader(
+        "👤 Detalji klijenta"
     )
 
-    st.write(
-        f"**Telefon:** {podatak['telefon']}"
-    )
+    col1, col2 = st.columns(2)
 
-with col2:
+    with col1:
 
-    st.write(
-        f"**Usluga:** {podatak['usluga']}"
-    )
+        st.write(
+            f"**Ime:** {podatak['ime']}"
+        )
 
-    st.write(
-        f"**Cena:** {podatak['cena']} din"
-    )
+        st.write(
+            f"**Telefon:** {podatak['telefon']}"
+        )
+
+    with col2:
+
+        st.write(
+            f"**Usluga:** {podatak['usluga']}"
+        )
+
+        st.write(
+            f"**Cena:** {podatak['cena']} din"
+        )
 
 # ====================================================
 # PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
