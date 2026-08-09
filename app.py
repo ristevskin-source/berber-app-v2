@@ -1922,7 +1922,7 @@ with col2:
 
 ids = []
 
-    vremena = []
+vremena = []
 
     for (d, v), p in podaci_termina.items():
 
