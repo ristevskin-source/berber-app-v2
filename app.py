@@ -2393,8 +2393,7 @@ with tab2:
             format_func=formatiraj_datum,
             index=0
         )
-        st.write("DEBUG ADMIN DATUM:", admin_datum)
-        st.write("DEBUG DATUMI:", admin_datumi)
+
 
         # ----------------------------------------------------
         # METRIKE
