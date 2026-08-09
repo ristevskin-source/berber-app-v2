@@ -1420,15 +1420,15 @@ def prikaz_nedeljnog_kalendara(admin_datum):
     <script>
 
         function klikniSlot(
-            tip,
-            datum,
-            vreme
-        ) {
+    tip,
+    datum,
+    vreme
+) {
 
-            window.location.search =
-                `?akcija=klik&tip=${tip}&datum=${datum}&vreme=${vreme}`;
+    window.parent.location.search =
+        `?akcija=klik&tip=${tip}&datum=${datum}&vreme=${vreme}`;
 
-        }
+}
 
     </script>
 
