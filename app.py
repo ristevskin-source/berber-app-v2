@@ -1097,6 +1097,16 @@ def ucitaj_rezervacije_za_datum(datum):
 # ============================================================
 # ADMIN - TABELA
 # ============================================================
+@st.dialog("👤 Detalji termina")
+def popup_zauzet_termin(ime, telefon, usluga, cena, datum, vreme):
+
+    st.write(f"**Klijent:** {ime}")
+    st.write(f"**Telefon:** {telefon}")
+    st.write(f"**Usluga:** {usluga}")
+    st.write(f"**Cena:** {cena} din")
+    st.write(f"**Datum:** {datum}")
+    st.write(f"**Vreme:** {vreme}")
+
 def prikaz_nedeljnog_kalendara(admin_datum):
 
     st.subheader("📅 Nedeljni pregled")
@@ -1708,43 +1718,16 @@ def prikaz_nedeljnog_kalendara(admin_datum):
 
         return
 
-    st.divider()
+    popup_zauzet_termin(
+        podatak["ime"],
+        podatak["telefon"],
+        podatak["usluga"],
+        podatak["cena"],
+        datum,
+        vreme
+)
 
-    st.subheader(
-        "👤 Detalji klijenta"
-    )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        st.write(
-            f"**Ime:** {podatak['ime']}"
-        )
-
-        st.write(
-            f"**Telefon:** {podatak['telefon']}"
-        )
-
-    with col2:
-
-        st.write(
-            f"**Usluga:** {podatak['usluga']}"
-        )
-
-        st.write(
-            f"**Cena:** {podatak['cena']} din"
-        )
-
-    st.write(
-        f"**Datum:** "
-        f"{formatiraj_datum(datum)}"
-    )
-
-    st.write(
-        f"**Vreme:** {vreme}"
-    )
-
+return
     # ====================================================
     # PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
     # ====================================================
