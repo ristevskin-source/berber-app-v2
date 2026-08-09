@@ -1353,10 +1353,7 @@ def prikaz_nedeljnog_kalendara(admin_datum):
 
         danas = admin_datum
 
-    pocetak_nedelje = (
-        danas
-        - timedelta(
-            days=danas.weekday()
+    pocetak_nedelje = danas
         )
     )
 
