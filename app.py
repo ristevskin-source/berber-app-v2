@@ -1696,43 +1696,60 @@ def prikaz_nedeljnog_kalendara(admin_datum):
             st.rerun()
 
         return
+# ====================================================
+# ZAUZET TERMIN
+# ====================================================
 
-    # ====================================================
-    # ZAUZET TERMIN
-    # ====================================================
-
-    podatak = podaci_termina.get(
-        (datum, vreme)
-    )
-
-    if podatak is None:
-
-        st.warning(
-            "Podaci za ovaj termin "
-            "nisu pronađeni."
-        )
-
-        st.session_state[
-            "kalendar_klik"
-        ] = None
-
-        return
-
-    popup_zauzet_termin(
-        podatak["ime"],
-        podatak["telefon"],
-        podatak["usluga"],
-        podatak["cena"],
-        datum,
-        vreme
+podatak = podaci_termina.get(
+    (datum, vreme)
 )
 
-return
-    # ====================================================
-    # PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
-    # ====================================================
+if podatak is None:
 
-    ids = []
+    st.warning(
+        "Podaci za ovaj termin "
+        "nisu pronađeni."
+    )
+
+    st.session_state[
+        "kalendar_klik"
+    ] = None
+
+    return
+
+st.divider()
+
+st.subheader(
+    "👤 Detalji klijenta"
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    st.write(
+        f"**Ime:** {podatak['ime']}"
+    )
+
+    st.write(
+        f"**Telefon:** {podatak['telefon']}"
+    )
+
+with col2:
+
+    st.write(
+        f"**Usluga:** {podatak['usluga']}"
+    )
+
+    st.write(
+        f"**Cena:** {podatak['cena']} din"
+    )
+
+# ====================================================
+# PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
+# ====================================================
+
+ids = []
 
     vremena = []
 
