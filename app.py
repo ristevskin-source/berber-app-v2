@@ -1916,15 +1916,15 @@ def prikaz_nedeljnog_kalendara(admin_datum):
             f"**Cena:** {podatak['cena']} din"
         )
 
-# ====================================================
-# PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
-# ====================================================
+    # ====================================================
+    # PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
+    # ====================================================
 
-ids = []
+    ids = []
 
-vremena = []
+    vremena = []
 
-for (d, v), p in podaci_termina.items():
+    for (d, v), p in podaci_termina.items():
 
         if (
             d == datum
@@ -1939,22 +1939,21 @@ for (d, v), p in podaci_termina.items():
 
             vremena.append(v)
 
-ids = sorted(
+    ids = sorted(
         set(ids)
     )
 
-vremena = sorted(
+    vremena = sorted(
         set(vremena)
     )
-popup_zauzet_termin(
-podatak,
-ids,
-vremena,
-datum,
-vreme
-)
 
-   
+    popup_zauzet_termin(
+        podatak,
+        ids,
+        vremena,
+        datum,
+        vreme
+    )
 
 # ====================================================
 # VEĆ NAPLAĆENO
