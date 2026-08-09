@@ -1354,8 +1354,6 @@ def prikaz_nedeljnog_kalendara(admin_datum):
         danas = admin_datum
 
     pocetak_nedelje = danas
-        )
-    )
 
     datumi = [
         pocetak_nedelje
