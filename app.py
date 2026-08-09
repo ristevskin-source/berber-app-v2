@@ -1325,6 +1325,13 @@ def prikaz_nedeljnog_kalendara(admin_datum):
         and vreme_klik
         and tip_klik
     ):
+        st.write(
+        "DEBUG QUERY:",
+        akcija,
+        datum_klik,
+        vreme_klik,
+        tip_klik
+    )
 
         st.session_state[
             "kalendar_klik"
