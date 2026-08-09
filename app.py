@@ -1960,7 +1960,7 @@ vreme
     # VEĆ NAPLAĆENO
     # ====================================================
 
-    elif podatak["status"] == "naplacen":
+    if podatak["status"] == "naplacen":
 
         st.success(
             f"✅ Naplaćeno — "
