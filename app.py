@@ -1916,67 +1916,67 @@ def prikaz_nedeljnog_kalendara(admin_datum):
             f"**Cena:** {podatak['cena']} din"
         )
 
-    # ====================================================
-    # PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
-    # ====================================================
+        # ====================================================
+        # PRONAĐI SVE SLOTOVE ISTE REZERVACIJE
+        # ====================================================
 
-    ids = []
+        ids = []
 
-    vremena = []
+        vremena = []
 
-    for (d, v), p in podaci_termina.items():
+        for (d, v), p in podaci_termina.items():
 
-        if (
-            d == datum
-            and p["ime"] == podatak["ime"]
-            and p["telefon"] == podatak["telefon"]
-            and p["usluga"] == podatak["usluga"]
-        ):
+            if (
+                d == datum
+                and p["ime"] == podatak["ime"]
+                and p["telefon"] == podatak["telefon"]
+                and p["usluga"] == podatak["usluga"]
+            ):
 
-            ids.append(
-                p["id"]
-            )
-
-            vremena.append(v)
-
-    ids = sorted(
-        set(ids)
-    )
-
-    vremena = sorted(
-        set(vremena)
-    )
-
-    popup_zauzet_termin(
-        podatak,
-        ids,
-        vremena,
-        datum,
-        vreme
-    )
-
-    # ====================================================
-    # VEĆ NAPLAĆENO
-    # ====================================================
-
-    if podatak["status"] == "naplacen":
-
-                st.success(
-                    f"✅ Naplaćeno — "
-                    f"{podatak['payment_method']}"
+                ids.append(
+                    p["id"]
                 )
 
-                if st.button(
-                    "✖️ Zatvori",
-                    key=f"zatvori_naplaceno_{datum}_{vreme}",
-                    use_container_width=True
-                ):
+                vremena.append(v)
 
-                    st.session_state[
-                        "kalendar_klik"
-                    ] = None
+        ids = sorted(
+            set(ids)
+        )
 
-                    st.rerun()
+        vremena = sorted(
+            set(vremena)
+        )
+
+        popup_zauzet_termin(
+            podatak,
+            ids,
+            vremena,
+            datum,
+            vreme
+        )
+
+        # ====================================================
+        # VEĆ NAPLAĆENO
+        # ====================================================
+
+        if podatak["status"] == "naplacen":
+
+            st.success(
+                f"✅ Naplaćeno — "
+                f"{podatak['payment_method']}"
+            )
+
+            if st.button(
+                "✖️ Zatvori",
+                key=f"zatvori_naplaceno_{datum}_{vreme}",
+                use_container_width=True
+            ):
+
+                st.session_state[
+                    "kalendar_klik"
+                ] = None
+
+                st.rerun()
 
 
 # ============================================================
