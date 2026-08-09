@@ -1955,28 +1955,28 @@ def prikaz_nedeljnog_kalendara(admin_datum):
         vreme
     )
 
-# ====================================================
-# VEĆ NAPLAĆENO
-# ====================================================
+    # ====================================================
+    # VEĆ NAPLAĆENO
+    # ====================================================
 
-if podatak["status"] == "naplacen":
+    if podatak["status"] == "naplacen":
 
-        st.success(
-            f"✅ Naplaćeno — "
-            f"{podatak['payment_method']}"
-        )
+                st.success(
+                    f"✅ Naplaćeno — "
+                    f"{podatak['payment_method']}"
+                )
 
-        if st.button(
-            "✖️ Zatvori",
-            key=f"zatvori_naplaceno_{datum}_{vreme}",
-            use_container_width=True
-        ):
+                if st.button(
+                    "✖️ Zatvori",
+                    key=f"zatvori_naplaceno_{datum}_{vreme}",
+                    use_container_width=True
+                ):
 
-            st.session_state[
-                "kalendar_klik"
-            ] = None
+                    st.session_state[
+                        "kalendar_klik"
+                    ] = None
 
-            st.rerun()
+                    st.rerun()
 
 
 # ============================================================
