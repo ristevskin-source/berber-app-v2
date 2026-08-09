@@ -1490,14 +1490,9 @@ def prikaz_nedeljnog_kalendara(admin_datum):
                 html += f"""
                     <td class="dan-kolona">
 
-                        <button
-                            class="slot-dugme slot-zauzet"
-                            onclick="klikniSlot(
-                                'zauzet',
-                                '{datum}',
-                                '{slot}'
-                            )">
-                        </button>
+                        <a class='slot-dugme slot-zauzet'
+                           href="?akcija=klik&tip=zauzet&datum={datum}&vreme={slot}">
+                        </a>
 
                     </td>
                 """
@@ -1511,14 +1506,9 @@ def prikaz_nedeljnog_kalendara(admin_datum):
                 html += f"""
                     <td class="dan-kolona">
 
-                        <button
-                            class="slot-dugme slot-slobodan"
-                            onclick="klikniSlot(
-                                'slobodan',
-                                '{datum}',
-                                '{slot}'
-                            )">
-                        </button>
+                        <a class='slot-dugme slot-slobodan'
+                           href="?akcija=klik&tip=slobodan&datum={datum}&vreme={slot}">
+                        </a>
 
                     </td>
                 """
@@ -1537,10 +1527,9 @@ def prikaz_nedeljnog_kalendara(admin_datum):
     # PRIKAZ TABELE
     # ----------------------------------------------------
 
-    components.html(
+    st.markdown(
         html,
-        height=600,
-        scrolling=False
+        unsafe_allow_html=True
     )
 
     # ====================================================
