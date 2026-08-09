@@ -1946,13 +1946,13 @@ ids = sorted(
 vremena = sorted(
         set(vremena)
     )
-    popup_zauzet_termin(
-    podatak,
-    ids,
-    vremena,
-    datum,
-    vreme
-    )
+popup_zauzet_termin(
+podatak,
+ids,
+vremena,
+datum,
+vreme
+)
 
    
 
