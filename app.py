@@ -2392,12 +2392,12 @@ with tab2:
 
         admin_datumi = generisi_datume()
 
-        admin_datum = st.selectbox(
-            "Izaberite datum",
-            admin_datumi,
-            format_func=formatiraj_datum,
-            key="admin_datum"
-        )
+    admin_datum = st.selectbox(
+        "Izaberite datum",
+        admin_datumi,
+        format_func=formatiraj_datum,
+        index=0
+    )
 
         # ----------------------------------------------------
         # METRIKE
