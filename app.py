@@ -1607,6 +1607,9 @@ def prikaz_nedeljnog_kalendara(admin_datum):
     datum,
     vreme
 ) {
+    alert(
+        tip + " | " + datum + " | " + vreme
+    );
 
     window.parent.location.search =
         `?akcija=klik&tip=${tip}&datum=${datum}&vreme=${vreme}`;
