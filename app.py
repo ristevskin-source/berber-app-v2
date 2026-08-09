@@ -1602,15 +1602,20 @@ def prikaz_nedeljnog_kalendara(admin_datum):
 
     <script>
 
-        function klikniSlot(
-    tip,
-    datum,
-    vreme
+    function klikniSlot(
+        tip,
+        datum,
+        vreme
 ) {
 
+        const url =
+            window.top.location.origin +
+            window.top.location.pathname +
+            `?akcija=klik&tip=${encodeURIComponent(tip)}` +
+            `&datum=${encodeURIComponent(datum)}` +
+            `&vreme=${encodeURIComponent(vreme)}`;
 
-    window.parent.location.search =
-        `?akcija=klik&tip=${tip}&datum=${datum}&vreme=${vreme}`;
+        window.top.location.href = url;
 
 }
 
